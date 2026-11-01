@@ -1,0 +1,17 @@
+/* Hands-free call card, placed inside the companion stage. */
+.handsfree-panel{width:100%;display:flex;flex-direction:column;gap:10px;padding:14px;border:1px solid #ffffffd0;border-radius:18px;background:#ffffffb8;transition:background-color .3s,border-color .3s}
+.handsfree-panel.is-active{background:#f4faef;border-color:#bcd2ab}
+.handsfree-description{display:flex;align-items:center;gap:11px}
+.handsfree-symbol{display:grid;place-items:center;flex-shrink:0;width:36px;height:36px;border-radius:12px;background:#dce9d1;color:#5d7d52}
+.handsfree-panel.is-active .handsfree-symbol{background:#cfe4c1}
+.handsfree-description strong{font-size:14px;color:#2f4d36;font-weight:600}
+.handsfree-description p{margin:1px 0 0;font-size:12.5px;line-height:1.55;color:#5f735a}
+.handsfree-panel>.button{width:100%;font-size:13.5px;min-height:42px;border-radius:12px}
+.handsfree-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.handsfree-controls>.button{font-size:12.5px;padding:9px 12px;min-height:38px;border-radius:11px;flex:1}
+.handsfree-privacy{font-size:11.5px;color:#7b8a76;margin:0;line-height:1.6}
+.handsfree-meter{display:flex;align-items:center;justify-content:center;gap:3px;width:40px;height:30px}
+.handsfree-meter i{display:block;width:4px;height:26px;border-radius:4px;background:#6f9160;transform-origin:center;transition:transform .08s linear}
+.handsfree-panel .error-note{margin:0;font-size:12.5px}
+@media(max-width:860px){.handsfree-panel{padding:11px;gap:8px}.handsfree-note{display:none}.handsfree-description p{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.handsfree-meter i{transition:none}}

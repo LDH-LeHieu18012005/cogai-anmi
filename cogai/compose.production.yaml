@@ -1,0 +1,20 @@
+# Use behind an operator-managed HTTPS reverse proxy. No automatic publication.
+services:
+  api:
+    restart: unless-stopped
+    environment:
+      COGAI_ENVIRONMENT: production
+      COGAI_COOKIE_SECURE: "true"
+      COGAI_KNOWLEDGE_DEVELOPMENT: "false"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+  web:
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

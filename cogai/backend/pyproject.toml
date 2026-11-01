@@ -1,0 +1,22 @@
+[project]
+name = "cogai-api"
+version = "0.1.0"
+description = "CogAI local research MVP, adapted from the team's Mind-Reframe and Lumina"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn>=0.32,<1",
+  "httpx>=0.28,<1",
+  "pydantic-settings>=2.6,<3",
+  "cryptography>=44,<49",
+  "edge-tts>=7,<8",
+  "av>=14,<17",
+  "websockets>=13,<16",
+]
+
+[dependency-groups]
+dev = ["pytest>=8,<10"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

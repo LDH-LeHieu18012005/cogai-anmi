@@ -1,0 +1,477 @@
+{
+ "about": "Bộ tri thức khởi đầu cho CogRAG (bản nháp). Do nhóm phát triển CogAI biên soạn dựa trên các phương pháp đã công bố; CHƯA được chuyên gia tâm lý duyệt. Chỉ dùng trong môi trường phát triển (development_only=true); production chỉ dùng thẻ review_status=approved có người duyệt.",
+ "defaults": {
+  "version": "vi-starter-2026-10-22",
+  "license": "Nội bộ CogAI – bản nháp chờ chuyên gia duyệt",
+  "review_status": "draft",
+  "reviewed_by": "",
+  "development_only": true
+ },
+ "documents": [
+  {
+   "id": "doc-ca-dem-mat-ngu",
+   "group": "worker",
+   "source": "Biên soạn theo hướng dẫn vệ sinh giấc ngủ cho người làm ca (AASM) và CBT-I",
+   "text": "Làm ca đêm rồi về nằm mà không ngủ được thì cơ thể và đầu óc đều rất mệt. Đồng hồ sinh học của mình đang bị kéo ngược với ánh sáng ban ngày, nên khó ngủ không có nghĩa là bạn yếu đuối. Mình có thể cùng xem lại khoảng một tiếng trước khi ngủ: đeo kính râm trên đường về, phòng tối và mát, để điện thoại xa giường, giữ giờ ngủ gần giống nhau giữa các ngày. Nếu nằm hai mươi phút vẫn tỉnh, dậy làm việc nhẹ trong ánh sáng mờ rồi quay lại giường. Bạn thấy điều gì trong số đó khó làm nhất với chỗ ở hiện tại?"
+  },
+  {
+   "id": "doc-tang-ca-kiet-suc",
+   "group": "worker",
+   "source": "Biên soạn theo CBT và quản lý căng thẳng nghề nghiệp",
+   "text": "Tăng ca liên tục khiến mình gần như không còn thời gian hồi sức, nên cảm giác cạn kiệt là phản ứng dễ hiểu chứ không phải do bạn kém. Khi không thể giảm giờ làm ngay, mình có thể tìm những khoảng nghỉ rất ngắn nhưng thật sự nghỉ: vài phút thở chậm giữa ca, ăn đủ bữa, một việc nhỏ mình thích vào ngày nghỉ. Cũng đáng để xem tăng ca có bắt buộc không và ai có thể cùng bạn trao đổi chuyện này, như tổ trưởng hay công đoàn. Trong tuần này, khoảng thời gian nào bạn có thể giữ riêng cho mình dù chỉ mười lăm phút?"
+  },
+  {
+   "id": "doc-bi-nhac-truoc-to",
+   "group": "worker",
+   "source": "Biên soạn theo tái cấu trúc nhận thức (Beck, 2020)",
+   "text": "Bị nhắc nhở trước mặt mọi người dễ làm mình thấy xấu hổ và nghĩ ngay đến điều tệ nhất. Mình thử tách hai phần: điều đã xảy ra là bạn bị nhắc vì làm chậm hôm nay, còn ý nghĩ 'làm gì cũng hỏng, kiểu gì cũng bị đuổi' là một dự đoán. Những lần trước công việc của bạn thế nào, và đã có ai bị cho nghỉ chỉ vì một lần chậm chưa? Nếu một người bạn cùng tổ gặp chuyện này, bạn sẽ nói gì với họ?"
+  },
+  {
+   "id": "doc-so-mat-viec",
+   "group": "worker",
+   "source": "Biên soạn theo CBT về lo âu và kỹ năng giải quyết vấn đề",
+   "text": "Lo mất việc khi đang phải lo cho bản thân và gia đình là nỗi lo rất thật. Mình có thể cùng chia nó ra: phần nào là điều đã có dấu hiệu rõ ràng, phần nào là điều mình đang sợ sẽ xảy ra. Với phần có thật, mình nghĩ xem có thể hỏi ai để biết rõ hơn, hoặc chuẩn bị gì cho phương án dự phòng. Với phần đang sợ, mình xem bằng chứng ủng hộ và chưa ủng hộ nó. Hiện giờ điều gì làm bạn nghĩ mình có thể bị cho nghỉ?"
+  },
+  {
+   "id": "doc-ap-luc-tien-bac",
+   "group": "worker",
+   "source": "Biên soạn theo kỹ năng giải quyết vấn đề (D'Zurilla & Nezu)",
+   "text": "Áp lực tiền bạc, nhất là khi còn phải gửi về cho gia đình, có thể đè nặng lên giấc ngủ và tâm trạng mỗi ngày. Đây là khó khăn thực tế, không phải lỗi của riêng bạn. Thay vì nghĩ về toàn bộ món nợ hay khoản cần lo, mình thử chọn một vấn đề cụ thể nhất trong tháng này, liệt kê vài cách có thể, kể cả những cách nhỏ, rồi chọn một cách thử trước. Khoản nào đang làm bạn lo nhiều nhất lúc này?"
+  },
+  {
+   "id": "doc-nho-nha-ky-tuc",
+   "group": "worker",
+   "source": "Biên soạn theo kích hoạt hành vi và hỗ trợ xã hội",
+   "text": "Xa nhà, sống ở ký túc xá với lịch làm ca khác nhau thì cảm giác cô đơn và nhớ nhà rất dễ đến, nhất là vào ngày nghỉ. Giữ những sợi dây nhỏ thường giúp nhiều hơn mình nghĩ: một cuộc gọi ngắn đều đặn với người thân, một bữa ăn chung với bạn cùng phòng, một hoạt động ở khu trọ hay của công đoàn. Mình không cần cảm thấy vui trước rồi mới làm; làm một việc nhỏ trước thì cảm xúc thường dịu đi sau. Hiện bạn còn giữ liên lạc với ai mà nói chuyện thấy dễ chịu?"
+  },
+  {
+   "id": "doc-mau-thuan-cung-phong",
+   "group": "both",
+   "source": "Biên soạn theo kỹ năng giao tiếp quả quyết (DEAR MAN, DBT)",
+   "text": "Sống chung mà giờ giấc và thói quen khác nhau thì va chạm là chuyện dễ xảy ra, và thiếu ngủ vì nó làm mình càng khó chịu hơn. Một cách nói thường dễ được lắng nghe là: kể đúng sự việc, nói cảm nhận của mình, nêu rõ một mong muốn cụ thể, rồi cùng tìm cách cả hai chấp nhận được, chẳng hạn giờ tắt đèn hay đeo tai nghe sau mười một giờ. Nên chọn lúc cả hai bình tĩnh thay vì lúc đang bực. Bạn muốn bạn cùng phòng thay đổi điều gì nhất?"
+  },
+  {
+   "id": "doc-bat-cong-cong-doan",
+   "group": "worker",
+   "source": "Biên soạn theo kỹ năng giải quyết vấn đề; không phải tư vấn pháp lý",
+   "text": "Khi thấy mình bị đối xử không công bằng ở nơi làm việc, cảm giác ấm ức và bất lực là rất dễ hiểu. Mình không thể tư vấn pháp lý, nhưng có thể cùng bạn ghi lại sự việc theo ngày giờ, nghĩ xem ai có thể hỗ trợ như công đoàn cơ sở, phòng nhân sự hay một đồng nghiệp tin tưởng, và chuẩn bị điều bạn muốn nói. Việc tìm hỗ trợ là quyền của bạn, không phải gây rắc rối. Bạn muốn bắt đầu từ việc ghi lại hay từ việc tìm người để hỏi?"
+  },
+  {
+   "id": "doc-lo-thi",
+   "group": "student",
+   "source": "Biên soạn theo CBT về lo âu thi cử và kỹ năng chia nhỏ nhiệm vụ",
+   "text": "Sát ngày thi mà còn nhiều phần chưa ôn thì lo lắng dâng lên là bình thường; một chút lo còn giúp mình tập trung. Khi lo quá nhiều, mình thử chia khối lượng còn lại thành các phần nhỏ, chọn phần quan trọng nhất cho tối nay, học từng khoảng hai mươi lăm phút rồi nghỉ ngắn. Ngủ đủ đêm trước thi thường có ích hơn thức trắng. Phần nào bạn thấy cần ưu tiên nhất?"
+  },
+  {
+   "id": "doc-thi-truot",
+   "group": "student",
+   "source": "Biên soạn theo tái cấu trúc nhận thức và lòng trắc ẩn với bản thân (Gilbert)",
+   "text": "Nhận điểm kém sau khi đã cố gắng rất buồn, và ý nghĩ 'mình thật kém cỏi' có thể xuất hiện ngay. Một bài thi cho biết kết quả của một lần, chưa nói lên toàn bộ khả năng của bạn. Mình thử xem điều gì đã góp phần vào kết quả này: thời gian ôn, cách ôn, sức khỏe hay áp lực khác, và lần tới có thể điều chỉnh điều gì. Nếu người bạn thân của bạn bị điểm kém, bạn sẽ nói gì với họ?"
+  },
+  {
+   "id": "doc-so-that-nghiep",
+   "group": "student",
+   "source": "Biên soạn theo CBT về lo âu tương lai và giải quyết vấn đề",
+   "text": "Lo không xin được việc sau khi ra trường là nỗi lo của rất nhiều sinh viên, nhất là khi nghe chuyện thị trường khó khăn. Phần lo về tương lai xa thường lớn hơn những gì mình kiểm soát được hôm nay. Mình có thể chọn một bước nhỏ trong tháng này: sửa CV, hỏi một anh chị khóa trên, tìm một chỗ thực tập hay tham gia một buổi hướng nghiệp của trường. Điều gì khiến bạn nghĩ mình sẽ không xin được việc?"
+  },
+  {
+   "id": "doc-co-don-dai-hoc",
+   "group": "student",
+   "source": "Biên soạn theo kích hoạt hành vi và hỗ trợ xã hội",
+   "text": "Lên thành phố học, chưa có nhiều bạn thân thì cảm giác lạc lõng và cô đơn là rất thật. Kết bạn thường bắt đầu từ những tiếp xúc nhỏ lặp lại: ngồi cùng nhóm học, tham gia một câu lạc bộ, nhắn hỏi bài một bạn cùng lớp. Không cần làm tất cả cùng lúc. Có lúc nào trong tuần bạn thấy dễ chịu hơn một chút không?"
+  },
+  {
+   "id": "doc-chia-tay",
+   "group": "both",
+   "source": "Biên soạn theo CBT và hỗ trợ khi mất mát",
+   "text": "Chia tay có thể để lại cảm giác trống trải, buồn và nhiều câu hỏi không có lời đáp. Nghĩ đi nghĩ lại về chuyện đã qua là phản ứng thường gặp, nhưng nếu nó kéo dài nhiều giờ mỗi ngày thì có thể làm mình mệt thêm. Cho phép mình buồn, đồng thời giữ những nhịp sinh hoạt cơ bản như ăn, ngủ, đi học đi làm và gặp người thân. Điều gì bạn thấy khó nhất mỗi khi nhớ lại?"
+  },
+  {
+   "id": "doc-ap-luc-gia-dinh",
+   "group": "student",
+   "source": "Biên soạn theo CBT về câu 'phải/nên' và giao tiếp",
+   "text": "Mong đợi của gia đình có thể vừa là động lực vừa là gánh nặng, nhất là khi mình sợ làm bố mẹ thất vọng. Đôi khi trong đầu có những câu như 'mình phải đứng đầu' hay 'mình không được làm ai buồn'. Mình thử xem những câu đó đến từ đâu, và nếu nói mềm hơn thành 'mình mong muốn' thì cảm giác có khác không. Bố mẹ đã từng nói điều gì cụ thể về việc học của bạn?"
+  },
+  {
+   "id": "doc-buon-keo-dai",
+   "group": "both",
+   "source": "Biên soạn theo hướng dẫn sàng lọc PHQ-9 và kích hoạt hành vi",
+   "text": "Buồn chán, mất hứng thú với cả những việc trước đây mình thích, kéo dài khoảng hai tuần trở lên, là dấu hiệu nên được để ý kỹ hơn. Bạn có thể làm bài sàng lọc PHQ-9 trong mục Sàng lọc để có thêm một góc nhìn; đó không phải chẩn đoán. Trao đổi với người có chuyên môn, như phòng y tế, phòng tư vấn của trường hay bác sĩ, là một bước đáng làm. Trong lúc đó, một việc rất nhỏ mỗi ngày, như đi bộ mười phút, cũng có ích. Tình trạng này đã kéo dài bao lâu rồi?"
+  },
+  {
+   "id": "doc-hoang-so-co-the",
+   "group": "both",
+   "source": "Biên soạn theo kỹ năng neo giữ (grounding) và thở chậm",
+   "text": "Tim đập nhanh, khó thở, chóng mặt khi lo âu dâng cao có thể rất đáng sợ, dù nó thường tự dịu đi sau vài phút. Thử thở chậm: hít vào bốn nhịp, thở ra sáu nhịp, lặp lại vài lần, và gọi tên năm thứ mình đang nhìn thấy quanh mình. Nếu những cơn này lặp lại hoặc có đau ngực, hãy đi khám để bác sĩ kiểm tra. Lúc cơn đến bạn thường đang ở đâu?"
+  },
+  {
+   "id": "doc-tu-trach",
+   "group": "both",
+   "source": "Biên soạn theo liệu pháp tập trung vào lòng trắc ẩn (CFT, Gilbert)",
+   "text": "Khi mọi chuyện không như ý, giọng nói trong đầu có thể rất khắt khe, như 'mình vô dụng' hay 'mình luôn làm hỏng'. Giọng nói đó thường muốn bảo vệ mình khỏi thất bại, nhưng cách nói làm mình đau thêm. Mình thử nói với bản thân theo cách một người bạn tử tế sẽ nói: ghi nhận là chuyện này khó, và mình đang cố gắng. Nếu viết một câu như vậy cho chính mình, bạn sẽ viết gì?"
+  },
+  {
+   "id": "doc-gio-giac-dien-thoai",
+   "group": "student",
+   "source": "Biên soạn theo hướng dẫn vệ sinh giấc ngủ",
+   "text": "Lướt điện thoại tới khuya rồi sáng mệt mỏi là vòng lặp nhiều bạn gặp, nhất là khi căng thẳng. Một vài thay đổi nhỏ có thể giúp: đặt giờ ngủ cố định, để điện thoại xa giường, tắt thông báo sau mười giờ, thay việc lướt bằng đọc vài trang sách. Không cần làm hoàn hảo ngay; thử một điều trong ba đêm rồi xem cảm giác thế nào. Bạn muốn thử thay đổi điều nào trước?"
+  },
+  {
+   "id": "doc-cau-gian",
+   "group": "worker",
+   "source": "Biên soạn theo CBT về quản lý cơn giận",
+   "text": "Dễ cáu gắt khi mệt và áp lực là phản ứng thường gặp, và nhận ra điều đó đã là một bước tốt. Mình có thể để ý những dấu hiệu sớm trong cơ thể như nóng mặt, nắm tay, rồi tạm rời đi vài phút, thở chậm trước khi đáp lại. Sau đó mình xem điều gì đã chạm vào mình và muốn nói gì một cách rõ ràng. Gần đây chuyện gì làm bạn bực nhất?"
+  },
+  {
+   "id": "doc-ngai-tim-ho-tro",
+   "group": "both",
+   "source": "Biên soạn theo tài liệu giảm kỳ thị khi tìm hỗ trợ sức khỏe tinh thần",
+   "text": "Ngại tìm người hỗ trợ vì sợ bị đánh giá, sợ ảnh hưởng tới công việc hay việc học là điều rất nhiều người cảm thấy. Tìm hỗ trợ khi khó khăn không có nghĩa là mình yếu, giống như đi khám khi bị đau. Bạn có thể bắt đầu từ người mình tin tưởng, hoặc mục Tìm người hỗ trợ trong ứng dụng, và tự quyết định chia sẻ đến đâu. Điều gì làm bạn ngại nhất khi nghĩ tới việc nói chuyện với ai đó?"
+  }
+ ],
+ "safety_cards": [
+  {
+   "id": "card-kham-pha-y-nghi-tu-hai",
+   "type": "xác nhận cảm xúc + đánh giá an toàn",
+   "source": "Biên soạn theo Safety Planning Intervention (Stanley & Brown, 2012)",
+   "title": "Khi có ý nghĩ làm hại bản thân hoặc không muốn sống",
+   "triggers": [
+    "nói không muốn sống, muốn biến mất",
+    "ý nghĩ tự làm đau bản thân",
+    "tuyệt vọng, thấy mình là gánh nặng"
+   ],
+   "goals": [
+    "người dùng thấy được lắng nghe, không bị phán xét",
+    "làm rõ mức an toàn hiện tại",
+    "kết nối với người thật và kênh khẩn cấp"
+   ],
+   "steps": [
+    "ghi nhận cảm xúc và cảm ơn họ đã chia sẻ",
+    "hỏi thẳng, nhẹ nhàng về ý nghĩ và mức an toàn ngay lúc này",
+    "nhắc gọi 115 nếu nguy hiểm trước mắt hoặc nhờ người tin tưởng ở gần đến ở cùng",
+    "mời mở kế hoạch an toàn cá nhân trong mục Hỗ trợ",
+    "không đưa chi tiết phương thức, không hứa giữ bí mật tuyệt đối"
+   ],
+   "examples": [
+    "Cảm ơn bạn đã nói với mình điều này. Ngay lúc này bạn có đang an toàn không?"
+   ],
+   "crisis": true,
+   "fits_steps": []
+  },
+  {
+   "id": "card-dau-hieu-canh-bao",
+   "type": "kế hoạch an toàn – bước 1, 2",
+   "source": "Biên soạn theo Safety Planning Intervention (Stanley & Brown, 2012)",
+   "title": "Nhận ra dấu hiệu cảnh báo và cách tự xoa dịu",
+   "triggers": [
+    "căng thẳng tăng dần trong nhiều ngày",
+    "thấy mình sắp không chịu nổi",
+    "muốn chuẩn bị trước cho lúc khó khăn"
+   ],
+   "goals": [
+    "người dùng nhận ra dấu hiệu sớm của mình",
+    "có sẵn hai ba việc tự làm để dịu lại"
+   ],
+   "steps": [
+    "hỏi những suy nghĩ, cảm giác hay tình huống thường xuất hiện trước khi mọi thứ tệ đi",
+    "cùng liệt kê việc tự làm được: thở chậm, đi bộ, nghe nhạc, tắm nước ấm",
+    "gợi ý ghi lại vào kế hoạch an toàn"
+   ],
+   "examples": [
+    "Thường trước khi mọi thứ trở nên quá sức, bạn để ý thấy dấu hiệu gì ở mình?"
+   ],
+   "crisis": true,
+   "fits_steps": []
+  },
+  {
+   "id": "card-ket-noi-nguoi-than",
+   "type": "kế hoạch an toàn – bước 3, 4, 5",
+   "source": "Biên soạn theo Safety Planning Intervention (Stanley & Brown, 2012)",
+   "title": "Kết nối với người và nơi giúp mình bớt một mình",
+   "triggers": [
+    "cô đơn, không biết nói với ai",
+    "sống xa gia đình",
+    "ngại làm phiền người khác",
+    "xa nhà, ở ký túc xá thấy lạc lõng"
+   ],
+   "goals": [
+    "tìm ra ít nhất một người có thể liên lạc",
+    "biết đầu mối chuyên môn và cấp cứu 115"
+   ],
+   "steps": [
+    "hỏi ai hoặc nơi nào giúp họ thấy bớt một mình",
+    "hỏi một người họ có thể nhờ giúp khi khó khăn",
+    "nhắc phòng y tế, phòng tư vấn của trường hoặc mục Tìm người hỗ trợ; cấp cứu 115 khi nguy hiểm"
+   ],
+   "examples": [
+    "Có ai mà khi nói chuyện bạn thấy nhẹ lòng hơn một chút không?"
+   ],
+   "crisis": false,
+   "fits_steps": [
+    "listen",
+    "action"
+   ]
+  },
+  {
+   "id": "card-moi-truong-an-toan",
+   "type": "kế hoạch an toàn – bước 6",
+   "source": "Biên soạn theo Safety Planning Intervention (Stanley & Brown, 2012)",
+   "title": "Làm cho nơi mình ở an toàn hơn",
+   "triggers": [
+    "đã có ý nghĩ tự làm hại",
+    "đang ở một mình trong lúc khó khăn"
+   ],
+   "goals": [
+    "giảm cơ hội tiếp cận vật có thể gây hại trong lúc khủng hoảng",
+    "có người ở cùng hoặc ở nơi đông người"
+   ],
+   "steps": [
+    "gợi ý nhờ người tin tưởng giữ hộ những thứ có thể gây hại, không đi vào chi tiết",
+    "gợi ý ở cùng người khác hoặc tới nơi có người",
+    "nhắc gọi 115 nếu nguy hiểm trước mắt"
+   ],
+   "examples": [
+    "Bạn có thể nhờ ai ở gần đến ở cùng hoặc giữ hộ những thứ khiến bạn lo không?"
+   ],
+   "crisis": true,
+   "fits_steps": []
+  },
+  {
+   "id": "card-tai-cau-truc-nhan-thuc",
+   "type": "tái cấu trúc nhận thức (CBT)",
+   "source": "Biên soạn theo Beck (2020), Cognitive Behavior Therapy",
+   "title": "Cùng xem lại một suy nghĩ tiêu cực",
+   "triggers": [
+    "kết luận tuyệt đối như 'làm gì cũng hỏng'",
+    "dự đoán điều tệ nhất",
+    "tự dán nhãn bản thân",
+    "bị nhắc nhở, phê bình rồi nghĩ mình kém cỏi, sẽ bị đuổi việc",
+    "nghĩ người khác coi thường mình"
+   ],
+   "goals": [
+    "tách sự kiện khỏi diễn giải",
+    "người dùng tự tìm ra góc nhìn cân bằng hơn"
+   ],
+   "steps": [
+    "nhắc lại suy nghĩ đúng lời họ nói",
+    "hỏi điều gì ủng hộ suy nghĩ đó",
+    "hỏi điều gì chưa ủng hộ, những lần trước ra sao",
+    "hỏi họ sẽ nói gì với một người bạn trong hoàn cảnh này",
+    "mời họ tự viết một câu cân bằng hơn"
+   ],
+   "examples": [
+    "Ý nghĩ 'làm gì cũng hỏng' có đúng với những ngày trước không?"
+   ],
+   "crisis": false,
+   "fits_steps": [
+    "identify",
+    "evidence"
+   ]
+  },
+  {
+   "id": "card-kich-hoat-hanh-vi",
+   "type": "kích hoạt hành vi",
+   "source": "Biên soạn theo Behavioral Activation (Lewinsohn; Martell và cs.)",
+   "title": "Một việc nhỏ để có lại chút năng lượng",
+   "triggers": [
+    "mất hứng thú, uể oải",
+    "nằm lì, bỏ bê sinh hoạt",
+    "buồn chán kéo dài",
+    "chán nản, chẳng muốn làm gì, nằm lướt điện thoại cả ngày"
+   ],
+   "goals": [
+    "chọn một hoạt động nhỏ, cụ thể, làm được",
+    "nhận ra hành động có thể đi trước cảm xúc"
+   ],
+   "steps": [
+    "hỏi việc gì trước đây từng mang lại chút dễ chịu hoặc cảm giác làm được việc",
+    "thu nhỏ việc đó cho vừa sức hôm nay",
+    "chọn thời điểm cụ thể",
+    "mời họ để ý cảm giác trước và sau"
+   ],
+   "examples": [
+    "Nếu chỉ chọn một việc mười phút cho chiều nay, bạn muốn làm gì?"
+   ],
+   "crisis": false,
+   "fits_steps": [
+    "action"
+   ]
+  },
+  {
+   "id": "card-tho-cham-neo-giu",
+   "type": "điều hòa cảm xúc",
+   "source": "Biên soạn theo kỹ thuật thở chậm và neo giữ 5-4-3-2-1",
+   "title": "Dịu lại khi lo âu dâng cao",
+   "triggers": [
+    "tim đập nhanh, khó thở vì lo",
+    "hoảng hốt",
+    "không tập trung được vì lo"
+   ],
+   "goals": [
+    "giảm kích động cơ thể trong vài phút",
+    "quay lại hiện tại"
+   ],
+   "steps": [
+    "mời thở vào bốn nhịp, thở ra sáu nhịp vài lần",
+    "gọi tên năm thứ nhìn thấy, bốn thứ chạm được",
+    "hỏi lại cảm giác sau đó",
+    "nhắc đi khám nếu các cơn lặp lại hoặc đau ngực"
+   ],
+   "examples": [
+    "Mình thử cùng thở chậm một chút nhé: hít vào bốn nhịp, thở ra sáu nhịp."
+   ],
+   "crisis": false,
+   "fits_steps": [
+    "listen"
+   ]
+  },
+  {
+   "id": "card-giai-quyet-van-de",
+   "type": "giải quyết vấn đề",
+   "source": "Biên soạn theo Problem-Solving Therapy (D'Zurilla & Nezu)",
+   "title": "Chia nhỏ một vấn đề thực tế",
+   "triggers": [
+    "khó khăn tiền bạc",
+    "nhiều việc dồn cùng lúc",
+    "không biết bắt đầu từ đâu",
+    "lo tiền gửi về nhà, nợ, nhiều việc dồn cùng lúc"
+   ],
+   "goals": [
+    "xác định một vấn đề cụ thể",
+    "chọn một bước thử đầu tiên"
+   ],
+   "steps": [
+    "chọn một vấn đề cụ thể nhất",
+    "cùng nghĩ vài cách, kể cả cách nhỏ",
+    "cân nhắc nhanh ưu nhược",
+    "chọn một cách thử trước và thời điểm làm"
+   ],
+   "examples": [
+    "Trong những việc đang dồn lại, việc nào nếu xử lý được thì bạn thấy nhẹ nhất?"
+   ],
+   "crisis": false,
+   "fits_steps": [
+    "clarify",
+    "action"
+   ]
+  },
+  {
+   "id": "card-giac-ngu-lam-ca",
+   "type": "vệ sinh giấc ngủ",
+   "source": "Biên soạn theo hướng dẫn giấc ngủ cho người làm ca (AASM) và CBT-I",
+   "title": "Ngủ tốt hơn khi làm ca",
+   "triggers": [
+    "mất ngủ sau ca đêm",
+    "đảo ca liên tục",
+    "buồn ngủ khi làm việc",
+    "công nhân đi ca đêm về không ngủ được"
+   ],
+   "goals": [
+    "một thay đổi nhỏ cho giấc ngủ phù hợp lịch ca",
+    "an toàn khi làm việc lúc buồn ngủ"
+   ],
+   "steps": [
+    "hỏi lịch ca và chỗ ngủ hiện tại",
+    "gợi ý phòng tối, mát, điện thoại xa giường, giờ ngủ ổn định",
+    "nếu nằm hai mươi phút không ngủ được thì dậy làm việc nhẹ",
+    "chọn một thay đổi thử trong ba ngày"
+   ],
+   "examples": [
+    "Sau ca đêm, từ lúc về tới lúc nằm xuống bạn thường làm gì?"
+   ],
+   "crisis": false,
+   "fits_steps": [
+    "clarify",
+    "action"
+   ]
+  },
+  {
+   "id": "card-tu-te-voi-ban-than",
+   "type": "lòng trắc ẩn với bản thân (CFT)",
+   "source": "Biên soạn theo Compassion Focused Therapy (Gilbert)",
+   "title": "Nói với mình như với một người bạn",
+   "triggers": [
+    "tự trách nặng nề",
+    "thấy mình vô dụng",
+    "xấu hổ sau sai sót"
+   ],
+   "goals": [
+    "giảm giọng tự phê phán",
+    "ghi nhận nỗ lực và khó khăn"
+   ],
+   "steps": [
+    "phản ánh giọng tự phê phán mà không tranh cãi",
+    "hỏi một người bạn tử tế sẽ nói gì",
+    "mời viết một câu tử tế với chính mình"
+   ],
+   "examples": [
+    "Nếu người bạn thân của bạn gặp đúng chuyện này, bạn sẽ nói gì với họ?"
+   ],
+   "crisis": false,
+   "fits_steps": [
+    "evidence"
+   ]
+  },
+  {
+   "id": "card-lo-au-thi-cu",
+   "type": "quản lý lo âu",
+   "source": "Biên soạn theo CBT về lo âu và kỹ thuật 'giờ dành để lo'",
+   "title": "Khi lo lắng về thi cử chiếm hết đầu óc",
+   "triggers": [
+    "lo thi, sợ trượt",
+    "học không vào",
+    "trì hoãn vì lo",
+    "sinh viên sợ trượt môn, sợ bố mẹ thất vọng",
+    "sắp thi mà chưa ôn xong"
+   ],
+   "goals": [
+    "đưa nỗi lo về kế hoạch cụ thể",
+    "giữ giấc ngủ trước kỳ thi"
+   ],
+   "steps": [
+    "chia khối lượng còn lại thành phần nhỏ",
+    "chọn phần ưu tiên cho hôm nay",
+    "học theo khoảng ngắn có nghỉ",
+    "dành mười lăm phút cố định để viết nỗi lo ra giấy"
+   ],
+   "examples": [
+    "Phần nào nếu ôn xong tối nay sẽ giúp bạn yên tâm hơn nhất?"
+   ],
+   "crisis": false,
+   "fits_steps": [
+    "clarify",
+    "action"
+   ]
+  },
+  {
+   "id": "card-giao-tiep-qua-quyet",
+   "type": "kỹ năng giao tiếp (DEAR MAN, DBT)",
+   "source": "Biên soạn theo kỹ năng hiệu quả liên cá nhân của DBT (Linehan)",
+   "title": "Nói điều mình cần một cách rõ ràng và tôn trọng",
+   "triggers": [
+    "mâu thuẫn với tổ trưởng, bạn cùng phòng",
+    "bị đối xử không công bằng",
+    "ngại lên tiếng",
+    "muốn nói với tổ trưởng, quản lý hay bạn cùng phòng về một chuyện khó"
+   ],
+   "goals": [
+    "chuẩn bị một lời nói ngắn, rõ ràng",
+    "giữ mối quan hệ và sự tự trọng"
+   ],
+   "steps": [
+    "mô tả đúng sự việc",
+    "nói cảm nhận của mình",
+    "nêu một mong muốn cụ thể",
+    "cùng tìm cách cả hai chấp nhận được",
+    "chọn thời điểm bình tĩnh"
+   ],
+   "examples": [
+    "Nếu được nói một câu với người đó, bạn muốn họ hiểu điều gì nhất?"
+   ],
+   "crisis": false,
+   "fits_steps": [
+    "action"
+   ]
+  }
+ ]
+}

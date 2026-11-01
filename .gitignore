@@ -1,0 +1,69 @@
+.tools/
+**/node_modules/
+**/.venv/
+**/__pycache__/
+**/.pytest_cache/
+**/.env
+**/.env.local
+**/.env.*.tmp
+**/data/
+**/dist/
+**/test-results/
+**/playwright-report/
+*.log
+*.tsbuildinfo
+**/firmware/backups/
+**/data-demo/
+
+# Private local recovery copies and audit output
+/.local-backups/
+**/archive/
+**/backups/
+**/output-ricky-*/
+**/.env.*
+!**/.env.example
+!**/.env.production.example
+**/.key
+**/*.key
+**/*.pem
+**/*.p12
+**/*.pfx
+**/*TOKEN*.txt
+**/*token*.txt
+**/credentials*.json
+**/secrets*.json
+**/*.sqlite*
+**/*.db
+**/*.db-*
+**/*.bin
+**/*.elf
+**/*.map
+**/*.zip
+**/*.7z
+**/*.tar
+**/*.tar.gz
+**/*.py[cod]
+**/.mypy_cache/
+**/.ruff_cache/
+**/.cache/
+**/build/
+**/managed_components/
+**/browser-data/
+**/.auth/
+**/storage-state*.json
+
+# Original submissions and research copies: retain locally; review before publishing
+/README.txt
+/DANH_GIA_SAN_PHAM_COGAI.md
+/Bao cao AnMi/
+/Tài liệu/
+/Paper/
+/Hinh anh CogAI/
+/research/
+
+# Operational records and build configuration containing the live endpoint
+/cogai/docs/NAP_ROBOT_ANMI_20261031.md
+/cogai/docs/KIEM_TRA_ROBOT_ANMI_20261027.md
+/cogai/docs/huong-dan-demo/
+/cogai/firmware/host-test-result.json
+/cogai/firmware/xiaozhi-esp32/main/boards/ricky-war-tank/config.json

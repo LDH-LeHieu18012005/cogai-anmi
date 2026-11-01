@@ -1,0 +1,71 @@
+name: Build AnMi Ricky
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: anmi-ricky-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  firmware:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    container:
+      image: espressif/idf@sha256:8ac794c57fd4cac246cb8d2ada4002fa26337ac7df683047b5b83743dbedb6b7
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check source manifest
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          for name, item in json.loads(Path('SOURCE_MANIFEST.json').read_text())['files'].items():
+              data = Path(name).read_bytes()
+              if len(data) != item['bytes'] or hashlib.sha256(data).hexdigest() != item['sha256']:
+                  raise SystemExit('Source hash mismatch: ' + name)
+          PY
+      - name: Test build selection and offline voice
+        run: |
+          source "$IDF_PATH/export.sh" >/dev/null
+          cd firmware
+          python3 -m unittest scripts.tests.test_build -q
+          cd ..
+          python3 verify_offline_voice.py
+      - name: Compile one board
+        env:
+          FIRMWARE_BOARD_DIR: ricky-war-tank
+          FIRMWARE_BOARD_NAME: ricky-war-tank
+          FIRMWARE_LANGUAGE: vi-VN
+          FIRMWARE_WAKE_WORD: disabled
+          FIRMWARE_SOURCE_REVISION: c435f99a88066029ec2dbd2d758c8cc9d051565b
+        run: |
+          source "$IDF_PATH/export.sh" >/dev/null
+          export FIRMWARE_SOURCE_DIR="$GITHUB_WORKSPACE/firmware"
+          export FIRMWARE_OUTPUT_DIR="$GITHUB_WORKSPACE/output"
+          python3 firmware/docker/firmware-builder/firmware_builder.py
+      - name: Verify exported images
+        run: |
+          python3 verify_firmware.py output
+          cp SOURCE_MANIFEST.json output/source-manifest.json
+      - name: Downloadable firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: anmi-ricky-n16r8-${{ github.run_number }}
+          path: output/
+          if-no-files-found: error
+          retention-days: 7
+      - name: Preserve failed build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: anmi-ricky-build-log-${{ github.run_number }}
+          path: output/*.log
+          if-no-files-found: ignore
+          retention-days: 7
