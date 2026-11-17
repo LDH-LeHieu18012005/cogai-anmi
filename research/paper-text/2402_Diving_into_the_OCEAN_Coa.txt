@@ -1,0 +1,1425 @@
+
+PAGE 1
+Diving into the OCEAN: Coarse-to-Fine Evidence Validation for
+Zero-Shot Big Five Inference
+Anonymous ACL submission
+Abstract
+This paper introducesEviOCEAN, a multi-001
+agent framework for personality detection002
+based on Big Five. Different from prior work003
+that directly maps input text to a trait, EviO-004
+CEAN addresses two main concerns of LLM-005
+based models: cognitive biases and the lack006
+of informative evidence of personal traits. For007
+cognitive biases, EviOCEAN comprises an ex-008
+tractor that extracts seven psychological indi-009
+cators formed a trait. For complementary ev-010
+idence, it offers a coarse-to-fine manner for011
+evidence validation. The validation uses a sum-012
+marizer to retain informative information and013
+high- and low-trait level disambiguation to pro-014
+vide evidence for final prediction using deter-015
+ministic routing. Experimental results on four016
+datasets show that EviOCEAN improves perfor-017
+mance personality detection and produces more018
+balance scores in OCEAN classes. EviOCEAN019
+is flexible and easy to adapt to any LLMs.020
+1 Introduction021
+Personality detection (PD) is a task that detects022
+relatively stable traits from human-generated text023
+using psychological frameworks, e.g., the Big Five024
+(Goldberg, 1992). This task is challenging be-025
+cause linguistic indicators provide useful but shal-026
+low and indirect evidence to traits (Pennebaker and027
+King, 1999) due to the inherently latent and context-028
+dependent relative nature of personality (Fang et al.,029
+2023). The detection has a significant impact in our030
+daily lives and work (Youyou et al., 2017; Štajner031
+and Yenikent, 2020; Aragón et al., 2026).032
+The advancement of LLMs leverages the033
+progress of personality detection. Prior studies ex-034
+tracted richer information from text by harnessing035
+LLMs (Rao et al., 2023; Hu et al., 2024). However,036
+LLMs are biased to specific word choices and con-037
+text, which still limits the accuracy and consistency038
+of personality detection (Gallegos et al., 2024). Re-039
+cent methods design multi-agent frameworks to040
+O C E A N
+−30
+−20
+−10
+0
+10
+20
+30
+High-label bias (pp)
++27.6
+-23.6
+-4.7
++7.1
++29.1
++19.6
+-18.3
+-3.4
++5.5
++21.8
++11.7
+-10.4
+-2.2
++3.5
++12.0
+Baseline PADO EviOCEAN
+Figure 1: High-trait label prediction bias (%) using
+GPT-4o on ESSAY . EviOCEAN can do debiasing. O:
+Openness; C: Conscientiousness; E: Extraversion; A:
+Agreeableness; N: Neuroticism. Positive values: over-
+prediction; negative values: underprediction.
+overcome these limitations (Li et al., 2025b; Hof- 041
+mann et al., 2025; Yeo et al., 2025). However, 042
+LLMs may exhibit a variety of cognitive biases 043
+similar to humans (Turpin et al., 2023; Koo et al., 044
+2024; Malberg et al., 2025) that affect the quality 045
+of personality detection. In addition, blur evidence 046
+hidden in text still challenges model validity in text- 047
+based personality computing (Fang et al., 2023).048
+We argue that cognitive biases of LLMs and un- 049
+clear evidence of low-trait level samples challenge 050
+multi-agent frameworks. First, LLMs are cognitive 051
+biases because they are trained on a huge amount of 052
+data that also reflect the biases of humans (Turpin 053
+et al., 2023; Koo et al., 2024; Malberg et al., 2025; 054
+Bhandari et al., 2025). It also creates biases when 055
+applying LLMs to downstream tasks. For example, 056
+the scores in Table 2 show that LLMs (the base- 057
+line) produce high scores ofOandA. Figures 1 058
+and 3 also support the bias of LLMs toO,C, and 059
+N. It aligns with the recent evaluation of zero-shot 060
+LLM-based Big Five inference (Di Cursi et al., 061
+2025). It suggests the use of social science per- 062
+1
+
+PAGE 2
+spectives to mitigate bias and increase the accuracy063
+and reliability of detection (Naik et al., 2024; Yeo064
+et al., 2025). Second, human-generated text usu-065
+ally includes diverse and mixed information. The066
+Realistic Accuracy Model suggests that personal-067
+ity judgment should depend on relevant available068
+evidence (Funder, 1995) that is hidden in text. Sam-069
+ples with high-trait levels may have clear evidence070
+for detection (LLMs focus more on high-trait level071
+samples in Figure 3); however, latent patterns and072
+blur evidence require sophisticated design to distill073
+information for samples with low-trait levels.074
+To address these concerns, we introduceEviO-075
+CEAN, a multi-agent framework for Big Five trait076
+inference. To deal with cognitive biases, EviO-077
+CEAN includes an extractor that extracts seven078
+psychological indicators (emotions, sociality, cog-079
+nition, motivation, self-concept, habits, and envi-080
+ronment) comprised a trait. To deal with blur evi-081
+dence, EviOCEAN uses a summarizer that retains082
+informative information from inputs and high- and083
+low-trait level disambiguation that provides evi-084
+dence in a coarse-to-fine manner to low-trait level085
+samples. The final prediction is determined through086
+deterministic routing, with conflict arbitration ap-087
+plied when both trait levels receive valid evidence.088
+The framework is intended to reduce reliance on089
+temporary states and weak proxies while treating090
+opposing trait evidence more consistently. This091
+paper makes three main contributions:092
+• It integrates social science to reconstruct la-093
+tent patterns of traits. The integration com-094
+bines linguistic and psychological indicators095
+to increase the accuracy of trait detection.096
+• It introduces EviOCEAN, a multi-agent097
+framework that mitigates cognitive biases and098
+provides complementary evidence in a coarse-099
+to-fine manner for distinguishing temporary100
+states and stable behavioral patterns in text.101
+• It examines EviOCEAN across four person-102
+ality corpora in the zero-shot setting. Experi-103
+mental results show that Evi produces promis-104
+ing results with flexible LLMs selection.105
+2 Related Work106
+Text-based personality detectionEarly meth-107
+ods inferred personality from lexical, psycholin-108
+guistic, and conversational features (Mairesse et al.,109
+2007; Pennebaker and King, 1999). The methods110
+range from using Transformer (Yang et al., 2021) or111
+BERT (Kerz et al., 2022). Resources such as PAN- 112
+DORA extended the task to large Reddit profiles 113
+(Gjurkovi´c et al., 2021). However, these supervised 114
+methods primarily associate textual representations 115
+with labels, leaving supporting evidence outside 116
+the explicit assessment target (Sun et al., 2024).117
+LLM-based personality inferenceLLMs ex- 118
+press personality knowledge and inference pro- 119
+cedures directly through prompts, although fine- 120
+grained distinctions remain difficult (V Ganesan 121
+et al., 2023). The techniques range from prompting 122
+LLMs with a questionnaire (PsyCoT) (Yang et al., 123
+2023), zero-shot prompting (Lin et al., 2026), per- 124
+sonality alignment (Zhu et al., 2025), or retrieved 125
+examples (Li et al., 2025b). Relevance filtering 126
+can further reduce unrelated information (Hofmann 127
+et al., 2025). However, prompts may shift predic- 128
+tions toward trait presence and produce class-wise 129
+asymmetries (Di Cursi et al., 2025). These methods 130
+provide psychological or evidence-based guidance, 131
+but do not organize inference around the distinction 132
+between temporary states and stable traits.133
+PADO introduces a multi-agent framework that 134
+contrasts levels (high and low) of each trait (Yeo 135
+et al., 2025). EviOCEAN follows this multi- 136
+perspective direction but distinguishes two major 137
+differences. First, EviOCEAN provides evidence 138
+in a coarse-to-fine manner by using a summarizer 139
+to reduce noise and high- and low-trait level disam- 140
+biguation that focuses on low-trait level samples. 141
+Second, EviOCEAN integrates seven psycholog- 142
+ical indicators in a non-induced way rather than 143
+forcing LLMs to predict high and low trait levels.144
+3 The EviOCEAN Framework145
+3.1 Problem Statement146
+Let T={O, C, E, A, N}denote five traits fol- 147
+lowed Big Five (Goldberg, 1992). For an individual 148
+i, the input is a collection of textual observations 149
+Xi ={x i,1, xi,2, . . . , xi,mi}, where Xi is human- 150
+generated text (a single essay, transcript, or multi- 151
+ple posts from the same author). The task maps Xi 152
+to five independently assigned binary labels:153
+Φ(Xi) = byi = (byi,t)t∈T ∈ {0,1}5,
+byi,t =
+(
+1,high-trait level,
+0,low-trait level.
+(1)154
+The labels are not mutually exclusive; each trait 155
+(high- or low-trait level) is inferred separately from 156
+the evidence available in the author’s text.157
+2
+
+PAGE 3
+Indicator Extractor
+Emotions Sociality Cognitive
+Motivation
+Habits EnvironmentSelf-concept
+Evidence Summarizer
+Final O/C/E/A/N
+Openness
+Conscientousness
+Extraversion
+Agreeableness
+Neuroticism
+Preliminary Trait
+Inference Agent
+High-trait level evidence validator
+Low-trait level
+disambiguation
+Conflict
+Arbitrator
+High Evidence: NoHigh Evidence: Yes
+Low Evidence: No Low Evidence: Yes
+Essay
+The author expresses difficulty in keeping track of dates since
+starting college, acknowledging the need for a daily planner but
+failing to implement it. They experience fluctuating hunger and
+are planning to have lunch with a new friend, appreciating the
+companionship but missing friends from home, Melissa and
+Amber. The author finds humor in their interactions, often
+making others laugh, ....
+O: High | C: High | E: High | A: High | N: High 
+O: no | C: no | E: no | A: yes | N: yes
+O: no | C: yes | E: no | A: no | N: no
+Keep Preliminary Certified Low
+Final = Low
+Certified High
+Final = High No Conflict
+High Low High High High
+I have been really upset with
+myself lately because for the
+life of me, I cannot seem to
+focus on school at all.
+My thoughts are so mixed
+up, I don't really know
+where to start.
+friends--my friends are awesome,
+i love them to death ...
+i need motivation, something
+that tells me to go for it...
+i really think i am a great
+person who has so much to ...
+i get so easily distracted and
+theres nothing i can do about it... 
+i'm sitting in my dorm room which
+is supposed to have 4 people ...
+My thoughts are so mixed up, I
+don't really know where to
+start. I have been really upset
+with myself lately because for
+the life of me, I cannot seem to
+focus on school at all. Not only
+...
+High N (anxiety) & C (focus). O/E/A high
+via prosocial values (limited evidence).
+Validates High A & N (warmth, anxiety).
+Rejects Low C evidence (distraction) as merely
+a temporary state. No evidence for O & E.
+Validates only Low C (unreliable
+focus). Rejects low evidence for
+O, E, A, N.
+High Evidence Valid
+Low Evidence Valid
+Trait Level Disambiguation
+Figure 2: Overview of EviOCEAN. The framework extracts complementary evidence views, performs preliminary
+trait inference, validates high- and low-trait level evidence, and routes each trait through deterministic arbitration.
+3.2 EviOCEAN Overview158
+Following an evidence-centered view of personality159
+judgment (Funder, 1995), we design EviOCEAN160
+in Figure 2. Evi includes an evidence summarizer161
+(Section 3.3), an indicator extractor (Section 3.4), a162
+high- and low-trait level disambiguation layer 3.5),163
+and conflict arbitration (Section 3.6).164
+3.3 Evidence Summarizer165
+Human-generated text usually includes mixed, di-166
+verse, and irrelevant information to a trait. We167
+therefore design an Evidence Summarizer that pro-168
+vides a compact view of the input using a prompt.169
+Given the text collection Xi, it produces an ordered170
+sequence of concise evidence statements.171
+gsum(Xi) =S i (2)172
+where Si contains 6-10 sentences. The summary173
+retains author-owned behavior, routines, emotions,174
+motives, goals, cognitive style, self-description, rel-175
+evant context, and counterevidence. The summa-176
+rizer serves as an evidence representation layer: it177
+compresses the source text to retain relevant ev-178
+idence and their contextual information. It also179
+retains linguistic styles that relate to traits (Pen-180
+nebaker and King, 1999; Pennebaker et al., 2001).181
+3.4 Indicator Extractor182
+As mentioned, LLMs may exhibit a variety of cog-183
+nitive biases on some OCEAN classes (Figures 1184
+and 3). To mitigate these biases, we integrate social185
+science into our framework. Psychological stud-186
+ies mentioned that personality traits are manifested187
+through recurring patterns formed by several as-188
+pects and levels. The Whole Trait Theory stated189
+that a trait includes a descriptive side and an ex- 190
+planatory side (Fleeson and Jayawickreme, 2015; 191
+Jayawickreme et al., 2019). The descriptive side 192
+contains behavior, thought, emotion, and motiva- 193
+tion states. The explanatory side consists of states 194
+created from the social-cognitive mechanism such 195
+as goals, beliefs, expectations, interpretations, mo- 196
+tives, self-regulatory processes, perception of a situ- 197
+ation. The personality systems framework (Mayer, 198
+2015) organized personality into four functional 199
+areas (the systems set): energy development (mo- 200
+tives and emotions), knowledge guidance (mental 201
+models, beliefs, and self-models), action implemen- 202
+tation (plans, actions, and behavior), and executive 203
+management (self-control, awareness and regula- 204
+tion). The framework also considered personality 205
+in the relation with external environment. A New 206
+Big Five divided personality into four levels: dis- 207
+positional traits, characteristic adaptations (goals, 208
+motives, values, coping strategies, beliefs, and so- 209
+cial roles), narrative identity, and culture and social 210
+context (McAdams and Pals, 2006).211
+Inspired by these studies, we design seven psy- 212
+chological indicators in different levels that may 213
+constitute a trait. They are emotions, cognition, 214
+sociality, motivation/goals, behavior/habits, self- 215
+concept/identity, and environment/context (detailed 216
+description of indicators is shown in A.1). The ex- 217
+tractor extracts the evidence (description) of each 218
+indicator from the input by using prompts. Let 219
+D denote a set of seven indicators, the extractor 220
+returns one evidence record for each indicatori i,d.221
+gind(Xi) =I i ={i i,d |d∈ D},
+ii,d = (edir, ectr,stability,scope) (3)222
+3
+
+PAGE 4
+The term edir contains text that directly shows the223
+corresponding psychological pattern, whereas ectr224
+contains text that suggests an opposing pattern. Sta-225
+bility indicates whether the evidence reflects a tem-226
+porary situation or a recurring tendency. Scope in-227
+dicates whether the evidence belongs to the author228
+and whether it appears in one or multiple source229
+segments. Together, these attributes describe both230
+the direction of the evidence and how consistently231
+it is expressed. Combined with the summarizer, the232
+extractor provides coarse-to-fine evidence for the233
+label disambiguation in Section 3.5.234
+3.5 Trait Level Disambiguation235
+As observed in Figures 1 and 3, LLMs may also236
+exhibit biases to samples with a high-trait level. To237
+mitigate these biases, we design a disambiguation238
+method that operates in three levels as follows.239
+Preliminary trait inferenceThe Preliminary240
+Trait Inference agent provides a coarse-grained ini-241
+tial prediction from the evidence summary Si and242
+the indicator set Ii. It considers the most visible243
+trait-related evidence without examining each evi-244
+dence in depth. For t∈ T, it returns a score and a245
+short narrative description of the traitt.246
+(q(0)i,t , r(0)i,t ) =f tpre(Si,I i),
+by(0)i,t =
+(
+high-trait level, q (0)i,t ≥5,
+low-trait level, q (0)i,t <5,
+(4)247
+where q(0)i,t ∈[0,10] denotes the preliminary score248
+and r(0)i,t summarizes the main evidence, counterev-249
+idence, and uncertainty. The estimation is provi-250
+sional and does not determine the final output.251
+At this stage, evidence presence and the trait252
+level (high and low) provide a surface-level trait253
+estimation; detailed checks of ownership, stabil-254
+ity, contextual scope, and opposing evidence are255
+deferred. Duplicate evidence in the summary and256
+indicators are treated as one signal. The subsequent257
+high- and low-trait level agents examine the two258
+directions independently, leaving the preliminary259
+prediction as a reference rather than a final vote.260
+High-trait level evidence validatorAfter doing261
+surface-level trait inference, Evi validates evidence262
+of samples with high-trait levels. The High-trait263
+Evidence Validator independently assesses above-264
+midpoint evidence without receiving the prelimi-265
+nary prediction or determining the final label.266
+hi,t =g thigh(Xi,S i,I i), h i,t ∈ {0,1},(5)267
+where hi,t = 1 denotes valid high-score evidence. 268
+Following the Realistic Accuracy Model, valida- 269
+tion requires relevant, author-owned, and trait- 270
+specific evidence (Funder, 1995); repetition and 271
+cross-context coverage provide additional support.272
+Temporary states, quotations, topic mentions, and 273
+duplicate evidence are treated cautiously, since per- 274
+sonality states may vary within an individual (Flee- 275
+son, 2001). Counter-evidence is retained but not 276
+converted into a low-trait level judgment.277
+Low-trait level disambiguationLLM-based per- 278
+sonality inference may favor the presence of traits, 279
+making low-trait evidence less likely to influence 280
+the final judgment (Di Cursi et al., 2025). The Low- 281
+trait Disambiguator therefore provides an analysis282
+of below-midpoint evidence, independently of the 283
+preliminary and high-trait evidence.284
+li,t =g tlow(Xi,S i,I i), l i,t ∈ {0,1},(6)285
+where li,t = 1 denotes the confirmed low-score evi- 286
+dence. Even sparse or weakly expressed low scores 287
+are retained for examination. To reliably confirm a 288
+low-trait level, the model requires clear and consis- 289
+tent evidence from the author’s own text (Funder, 290
+1995). It differentiates between stable behavioral 291
+patterns (e.g., being consistently rigid or preferring 292
+isolation) and temporary reactions (e.g., a single 293
+missed task or momentary anger). Therefore, if the 294
+evidence is weak or ambiguous, the model marks it 295
+as insufficient rather than forcing a final prediction. 296
+3.6 Conflict Arbitrator297
+The conflict arbitrator assigns each trait based on 298
+the evidence states hi,t and li,t of high- and low- 299
+trait level validators as follows.300
+byi,t =
+
+
+
+HIGH,(h i,t, li,t) = (1,0),
+LOW,(h i,t, li,t) = (0,1),
+ai,t,(h i,t, li,t) = (1,1),
+by(0)i,t ,(h i,t, li,t) = (0,0),
+(7)301
+where ai,t is the Conflict Arbitrator decision and 302
+by(0)i,t is the decision of the Preliminary Trait Infer- 303
+ence agent. A single validated score is therefore 304
+routed directly, whereas an additional LLM call is 305
+reserved for conflicting evidence. This conditional 306
+structure keeps the routing rule fixed and reduces 307
+unnecessary agent intervention (Table 9).308
+In cases where both high- and low-trait level 309
+agents find valid evidence for the same trait, the 310
+4
+
+PAGE 5
+Conflict Arbitrator is invoked to resolve the contra-311
+diction. The Arbitrator comprehensively reviews312
+the outputs and reasoning of all preceding agents.313
+By weighting the strength and consistency of the314
+conflicting evidence, it makes the final decision on315
+the trait label. If one trait level (high or low) has316
+clearer support, the arbitrator returns that label; oth-317
+erwise, the preliminary estimate provides the fall-318
+back. Neither routing nor arbitration uses dataset319
+identity or class prevalence. Algorithm 1 shows the320
+complete inference process of EviOCEAN.321
+Algorithm 1EviOCEAN Inference
+Input:X i,T={O, C, E, A, N}
+Output: byi
+1: ExtractS i =g sum(Xi)using Eq. (2)
+2: ExtractI i =g ind(Xi)using Eq. (3)
+3:for allt∈ Tdo
+4: Obtain(q (0)i,t , r(0)i,t ,by(0)i,t )using Eq. (4)
+5: Validateh i,t =g thigh(Xi,S i,I i)using Eq. (5)
+6: Disambiguatel i,t =g tlow(Xi,S i,I i)using Eq. (6)
+7:ifh i,t = 1andl i,t = 0then
+8:by i,t ←HIGH
+9:else ifh i,t = 0andl i,t = 1then
+10:by i,t ←LOW
+11:else ifh i,t = 1andl i,t = 1then
+12: Obtain ai,t from Xi,S i,I i, r(0)i,t , hi,t, li,t using
+Section 3.6
+13:by i,t ←a i,t
+14:else
+15:by i,t ←by(0)i,t
+16:end if
+17:end for
+18: byi ←(byi,t)t∈T
+19:return byi
+4 Experimental Setup322
+4.1 Datasets323
+Evaluation uses four PD benchmark datasets.324
+TheEssaysdataset contains 2,468 stream-of-325
+consciousness essays, each classified as either high326
+or low on the OCEAN personality traits based on a327
+standardized self-report questionnaire (Pennebaker328
+and King, 1999). Each essay comprises approxi-329
+mately 50 sentences on average. 10% of the dataset330
+was selected as the test set.MyPersonalitycon-331
+tains 9,913 Facebook status updates written by 250332
+users (Celli et al., 2013). Each user was catego-333
+rized as either high or low on the OCEAN based334
+on a standardized self-report questionnaire. The335
+Youtubecorpus comprises manually transcribed336
+videos from 404 YouTube vloggers (Biel et al.,337
+2013). Personality traits were annotated by Ama-338
+zon Mechanical Turk workers with high intraclass339
+correlation coefficients.Pandoraincludes Red-340
+dit comments from 10,000 users, 1,600 of whom 341
+have BigFive profiles (Gjurkovi´c et al., 2021). Our 342
+experiments sampled a test subset of 222 users.343
+Table 1: Data statistics.N: the number of samples.
+Dataset GenreN
+ESSAY Essay 254
+YOUTUBE Vlog 404
+My Personality Author 250
+PANDORA Author 222
+4.2 LLM Backbones344
+We used different LLMs as the backbone for eval- 345
+uation. They include GPT models (GPT-4o 1 and 346
+GPT-52), and two open source LLMS: LaMA3-8B- 347
+Instruct3 and Solar-10.7B-Instruct.4 348
+5 Results and Discussion349
+5.1 Main Results350
+Zero-shot comparisonTable 2 shows that EviO- 351
+CEAN produces the best results on four datasets 352
+in the zero-shot setting. The improvement comes 353
+from two main aspects. First, Evi takes into ac- 354
+count social science that includes seven psycho- 355
+logical indicators to reduce the cognitive biases of 356
+LLMs. The scores of Evi in OCEAN classes are 357
+quite balanced, while the baseline that directly uses 358
+LLMs is biased in some classes. For example, GPT- 359
+4o focuses more on O and N classes on ESSAYS 360
+and PANDORA while Solar is biased on O, E, and 361
+A classes on My Personality. By integrating seven 362
+psychological indicators, Evi can mitigate biases 363
+and improve performance. Second, Evi offers a 364
+coarse-to-fine manner to validate evidence using a 365
+summarizer and an evidence disambiguation layer. 366
+It provides fine-grained and informative informa- 367
+tion. Combined with the psychological indicators, 368
+Evi can make correct predictions. PADO follows 369
+our EviOCEAN because it also incorporates social 370
+science to the reasoning framework. The baseline 371
+and PsyCoT using single prompts produce poor 372
+results due to the shallow analysis of input, without 373
+using social science or coarse-to-fine information 374
+extraction. Output observation is in A.3 and A.4.375
+1https://platform.openai.com/docs/models/gpt-4o
+2https://developers.openai.com/api/docs/models/gpt-5
+3https://huggingface.co/meta-llama/Meta-Llama-3-8B-
+Instruct
+4https://huggingface.co/upstage/SOLAR-10.7B-Instruct-
+v1.0
+5
+
+PAGE 6
+Table 2: Comparison of EviOCEAN with strong zero-shot methods using Macro F1-score.Bold: the best with
+p-values≤0.05in the same group;italic: the second best.
+Models Methods ESSAYS YOUTUBE
+O C E A N A VG. O C E A N A VG.
+GPT-4o
+Baseline 60.61 23.45 32.53 46.0167.8646.09 65.45 42.7169.15 70.0652.79 60.03
+PsyCoT 57.30 57.41 59.74 61.13 56.58 58.43 66.31 47.58 67.82 68.91 58.14 61.75
+PADO 70.0070.0063.00 65.00 61.00 66.0067.5450.46 66.51 68.05 63.27 63.17
+EviOCEAN70.4165.94 63.78 71.2566.31 67.5466.11 61.9464.84 64.4165.70 64.60
+GPT-5
+Baseline 67.43 50.26 53.10 62.2469.8760.57 65.56 51.38 66.3670.8154.05 61.93
+PsyCoT 67.91 50.48 54.63 63.31 68.54 60.97 67.42 53.29 66.68 69.94 51.27 61.72
+PADO 68.55 50.79 56.39 64.54 67.12 61.4869.1855.0566.9669.21 47.62 61.60
+EviOCEAN70.59 65.37 64.34 70.3163.2566.7766.25 61.6164.44 64.69 57.78 62.95
+Llama3-8B
+Baseline 43.43 18.71 26.32 18.63 66.23 34.66 41.86 16.25 54.47 40.38 61.97 42.99
+PsyCoT 54.27 34.18 37.41 39.84 64.92 46.12 53.48 34.92 59.31 52.17 59.63 51.90
+PADO 66.48 49.78 48.57 61.43 63.56 58.16 64.97 53.44 64.29 64.09 57.14 60.79
+EviOCEAN71.26 64.78 63.06 68.50 66.25 66.77 66.12 61.67 64.5764.15 65.56 64.41
+Solar
+Baseline 59.39 33.58 43.21 52.4367.9751.32 47.32 35.29 43.18 61.54 53.89 48.24
+PsyCoT 64.71 40.54 50.62 54.71 67.96 55.71 57.63 48.21 54.82 65.91 53.19 55.95
+PADO 70.19 47.42 58.11 56.83 67.94 60.10 67.68 61.35 66.38 70.21 52.67 63.66
+EviOCEAN70.41 65.79 63.61 70.1066.6967.0866.25 62.2064.57 65.38 65.42 64.76
+Models Methods My Personality PANDORA
+O C E A N A VG. O C E A N A VG.
+GPT-4o
+Baseline 70.59 28.0553.8759.14 42.49 50.83 70.52 47.62 38.57 56.6559.6554.60
+PsyCoT 76.24 41.37 53.41 59.08 46.62 55.34 70.15 51.04 46.73 57.19 59.48 56.92
+PADO 83.00 53.00 53.00 59.00 51.00 60.00 69.67 54.36 55.87 57.92 59.20 59.40
+EviOCEAN82.94 67.9155.1369.66 56.56 66.44 70.93 68.40 66.06 66.2657.8865.91
+GPT-5
+Baseline 71.39 52.9755.8163.27 47.76 58.24 72.55 53.71 52.50 70.9058.6061.65
+PsyCoT 74.19 53.51 55.72 65.86 43.61 58.58 71.34 56.81 57.38 67.12 54.92 61.51
+PADO 76.84 53.98 55.59 68.75 39.55 58.94 70.03 60.12 62.19 63.49 51.11 61.39
+EviOCEAN82.63 68.8055.49 69.15 54.36 66.09 71.30 65.59 67.59 68.1359.6966.46
+Llama3-8B
+Baseline 68.10 28.40 51.94 44.00 50.00 48.49 61.00 21.05 49.40 60.7758.9150.23
+PsyCoT 73.61 40.23 51.28 51.84 48.79 53.15 65.42 43.19 54.61 62.37 56.14 56.35
+PADO 79.39 51.85 50.53 59.50 47.62 57.78 70.09 65.49 59.93 63.89 53.52 62.58
+EviOCEAN82.82 68.78 55.81 69.97 56.90 66.86 71.14 69.05 65.58 65.8556.19 65.56
+Solar
+Baseline 65.60 19.51 51.11 51.58 48.00 47.16 55.87 19.82 36.21 46.88 55.95 42.94
+PsyCoT 72.18 30.43 53.39 56.84 45.02 51.57 63.74 39.81 51.64 50.12 56.18 52.30
+PADO 78.82 41.2155.6362.02 42.11 55.9671.7660.1967.1653.57 56.39 61.81
+EviOCEAN82.63 68.7855.49 70.00 56.32 66.6471.5168.2965.81 67.75 58.55 66.38
+Figures 1 and 3 show that Evi can reduce the376
+bias of LLMs (GPT-4o) to produce more balanced377
+scores on OCEAN classes in Table 2). It confirms378
+the contribution of psychological indicators in Sec-379
+tion 3.4 to mitigate the cognitive biases of LLMs.380
+Reference to fine-tuned SOTA methodsWe381
+made a reference comparison of EviOCEAN to382
+SOTA fine-tuned methods on Essay and My Person-383
+ality. We did not claim Evi produces the best scores384
+due to different settings.BERT-baseencodes input385
+text using the encoder of BERT trait detection (Yeo386
+et al., 2025).Transformer-MDuses a a multi-387
+document Transformer that accesses information388
+of user posts (Yang et al., 2021).PerDet-R1con-389
+siders PD as a ranking task that uses supervised 390
+fine-tuning (SFT) with Group Relative Policy Opti- 391
+mization for optimization (Cao et al., 2026).BIG5- 392
+CHATuses SFT and Direct Preference Optimiza- 393
+tion to align LLMs with human personality patterns 394
+on 100,000 dialogues (Li et al., 2025a).395
+Table 3 shows that EviOCEAN achieves the sec- 396
+ond best scores over strong fine-tuned methods. It 397
+confirms the efficiency of our method that takes 398
+into account psychological indicators in a course- 399
+to-fine manner. BIG5-CHAT is the best due to the 400
+use of fine-tuning using reinforcement learning on 401
+a large dataset. However, our method does not 402
+require annotated samples and further training pro- 403
+6
+
+PAGE 7
+Table 3: Comparison with SOTA methods on ESSAYS
+and My Personality (MP) using Macro F1-score.
+Methods ESSAY MP
+BERT-base (Yeo et al., 2025) 57.00 50.00
+Transformer-MD (Yang et al., 2021) 60.92 63.48
+PerDet-R1 (Cao et al., 2026) 66.10 65.17
+BIG5-CHAT (Li et al., 2025a)70.54 71.83
+EviOCEAN 67.54 66.86
+cedures that may be costly in actual applications,404
+e.g., healthcare or mental health support. BERT-405
+base and Transformer-MD produce low scores due406
+to the shallow analysis of input text.407
+5.2 Ablation Study408
+5.2.1 Component-wise Contribution409
+Table 4 shows that the Summarizer provides the ini-410
+tial evidence, while the Indicator Extractor adds ev-411
+idence from the seven psychological domains. The412
+Arbitrator resolves cases in which both directions413
+receive valid support. Macro-F1 increases as these414
+components are added on the two datasets, with415
+the complete configuration providing the strongest416
+performance. This similar trend suggests that the417
+components offer complementary information.418
+Table 4: Component-wise observation on ESSAYS and
+My Personality. HLEV: the High-trait Level Evidence
+Validator, and LLD: the Low-trait Level Disambiguator.
+Agents Configurations
+Summarizer✓ ✓ ✓ ✓ ✓ ✓
+Indicator Extractor✓ ✓ ✓ ✓ ✓
+Preliminary Inference✓ ✓ ✓ ✓
+HLEV✓ ✓ ✓
+LLD✓ ✓
+Arbitrator✓
+Macro-F1
+ESSAYS 60.85 62.40 63.12 63.95 65.1067.54
+My Personality 59.95 61.50 62.24 63.15 64.2566.44
+The leave-one-out (LOO) test in Table 5 shows419
+that each component (agent) contributes to both420
+our EviOCEAN and the non-reasoning baseline.421
+The table also confirms the contribution of each422
+agent for high- and low-trait level disambiguation423
+(HLEV and LLV) mentioned in Section 3.5. For424
+LOO, the high-trait level validator and low-trait425
+level disambiguation contribute more than prelimi-426
+nary inference. It can be understandable that lower427
+layers provide more fine-grained evidence than a428
+shallow one. For standalone gain, a non-reasoning429
+baseline may prefer shallow information.430
+Table 5: LOO and standalone gain analysis (∆F1) for
+different agents. Standalone gain: the improvement by
+adding only that agent to the non-reasoning baseline.
+Agent LOO Standalone gain
+(∆F1) (∆F1)
+Summarizer -2.54 +2.37
+Indicator Extractor -3.61 +0.82
+Preliminary Inference -1.28 +2.84
+HLEV -1.93 +2.16
+LLD -1.78 +1.92
+Arbitrator -2.44 +0.15
+5.2.2 Contribution of Psychological Indicators 431
+Indicator-wise observationTable 6 shows the 432
+observation of each indicator in Figure 2. It in- 433
+dicates that all indicators contribute to improve 434
+Macro-F1 scores. Among the indicators, habits and 435
+environment contribute less than others because the 436
+evidence of these indicators requires observation in 437
+a quite long time rather than in current short texts.
+Table 6: Indicator contribution using GPT-4o.
+Indicator Settings
+Emotion✓ ✓ ✓ ✓ ✓ ✓ ✓
+Cognitive✓ ✓ ✓ ✓ ✓ ✓
+Sociality✓ ✓ ✓ ✓ ✓
+Motivation✓ ✓ ✓ ✓
+Self-concept✓ ✓ ✓
+Habits✓ ✓
+Environment✓
+Macro-F1
+ESSAYS 61.85 63.20 64.60 65.65 66.40 67.0567.54
+My Personality 60.50 61.85 63.30 64.40 65.25 65.9066.44
+438
+Figure 3 shows that the indicators help to miti- 439
+gate the bias of LLMs in O, C, and N while increas- 440
+ing a little of E and A (≤1% ). This debiasing helps 441
+to improve the performance of our model in Table 442
+2 that shows more balance scores for all classes.443
+Leave-one-out test (LOO)We also observed the 444
+contribution of each psychological indicator using 445
+the leave-one-out test. Table 7 shows that removing 446
+any indicator reduces the performance of the model. 447
+Among them, emotion, cognition, sociality, and 448
+motivation contribute more than others. A possible 449
+reason is that these aspects are quite easy to observe. 450
+In contrast, self-concept, habits, and environment 451
+are hidden in text that may require deeper analyses. 452
+The standalone gain confirms positive contribution 453
+of each indicator to the non-reasoning model.454
+5.2.3 Psychology and Summary Assessment455
+We evaluated the Evidence Summary and seven- 456
+indicator records on a Likert scale for Faithfulness 457
+7
+
+PAGE 8
+O C E A N
+Emotions
+Cognition
+Sociality
+Motivation
+Habits
+Self-concept
+Context
+-15%
+(-2.4 pp)
+-15%
+(-2.0 pp)
++16%
+(+0.4 pp)
++14%
+(+0.5 pp)
+-15%
+(-2.6 pp)
+-25%
+(-4.0 pp)
+-20%
+(-2.6 pp)
++20%
+(+0.5 pp)
+-6%
+(-0.2 pp)
+-20%
+(-3.4 pp)
+-10%
+(-1.6 pp)
+-10%
+(-1.3 pp)
++32%
+(+0.8 pp)
++25%
+(+0.9 pp)
+-15%
+(-2.6 pp)
+-15%
+(-2.4 pp)
+-20%
+(-2.6 pp)
+-4%
+(-0.1 pp)
++25%
+(+0.9 pp)
+-15%
+(-2.6 pp)
+-10%
+(-1.6 pp)
+-20%
+(-2.6 pp)
++20%
+(+0.5 pp)
++19%
+(+0.7 pp)
+-15%
+(-2.6 pp)
++5%
+(+0.8 pp)
+-20%
+(-2.7 pp)
++24%
+(+0.6 pp)
+-6%
+(-0.2 pp)
+-15%
+(-2.5 pp)
+-30%
+(-4.7 pp)
++5%
+(+0.6 pp)
+-8%
+(-0.2 pp)
++28%
+(+1.0 pp)
+-5%
+(-0.8 pp)
+−30 −15 0 15 30
+Signed bias change (%)
+Cell: change in signed high-label bias
+Figure 3: Indicator-wise contributions to high-trait level
+bias of OCEAN. Negative values decrease predicted-
+high bias, while positive values increase it. Values in
+parentheses denote percentage-point changes.
+Table 7: LOO and standalone gain (∆F1) of indicators.
+Indicator LOO Standalone gain(∆F1) (∆F1)
+Emotion−1.13 +1.86
+Cognition−0.94 +1.38
+Sociality−1.47 +2.14
+Motivation−0.76 +1.09
+Self-concept−0.58 +0.87
+Habits−0.51 +0.73
+Environment−0.34 +0.49
+(source-supported accuracy), Relevance (utility for458
+personality inference), and Coverage (inclusion of459
+main evidence) (Durmus et al., 2020; Fabbri et al.,460
+2021; Nenkova and Passonneau, 2004). Three inde-461
+pendent human annotators (detail in A.2) reached462
+substantial agreement (Fleiss’ κ= 0.78 ) on 100463
+samples, complemented by GPT-4.15 as an LLM464
+judge on all testing samples of Essay and My Per-465
+sonality. Table 8 shows high overall ratings: sum-466
+maries excelled in Faithfulness, while the indica-467
+tor records scored higher in Relevance and Cover-468
+age. Human and LLM assessments aligned closely,469
+though LLM scores were marginally higher.470
+5.2.4 Latency and Cost471
+We observed latency and cost that are important472
+aspects to deploy personality detection models in473
+5https://developers.openai.com/api/docs/models/gpt-4.1
+Table 8: Human and LLM evaluations. F: Faithfulness;
+R: Relevance; C: Coverage. MP: My Peronality.
+Dataset Component LM Judge Human
+F R C F R C
+ESSSAY Summary 4.53 4.27 4.02 4.38 4.14 3.897-Indicators 4.28 4.42 4.26 4.11 4.31 4.13
+MP Summary 4.29 4.07 3.77 4.12 3.94 3.637-Indicators 4.08 4.21 3.96 3.91 4.09 3.82
+actual cases. Table 9 shows the observation com- 474
+puted over the baseline on MELD. Our EviOCEAN 475
+is nearly 2-3 times faster than PADO that uses a 476
+quite complicated personality-induced framework 477
+(15 agents). In contrast, Evi uses a simpler archi- 478
+tecture that includes six agents. In addition, the 479
+course-to-fine approach also provides a method 480
+that removes noisy information (the summarizer). 481
+The both aspects help to reduce latency and cost.482
+Table 9: Latency and cost of PD methods on MELD.
+Ratio is the runtime relative to the baseline.
+Method gpt-4o gpt-5
+Ratio Cost ($) Ratio Cost ($)
+Baseline – 0.010 – 0.027
+PADO 18.275 0.103 10.355 0.347
+EviOCEAN4.956 0.046 6.660 0.227
+6 Conclusion483
+This paper presentedEviOCEAN, a zero-shot 484
+multi-agent framework, that addresses two con- 485
+cerns of LLMs for OCEAN trait inference: cog- 486
+nitive biases and lack of informative evidence of 487
+OCEAN traits. To mitigate the cognitive biases of 488
+LLMs, EviOCEAN integrates psychological indica- 489
+tors in different levels and views from an indicator 490
+extractor. To address the lack of clear evidence, 491
+EviOCEAN uses a course-to-fine evidence valida- 492
+tion process that combines information from the 493
+extractor and an evidence summarizer for trait level 494
+disambiguation. The final trait prediction is done 495
+by deterministic routing and selective conflict ar- 496
+bitration. Experimental results on four datasets 497
+with four LLM backbones show that EviOCEAN 498
+produces better performance than strong zero-shot 499
+methods. Ablation studies also indicate more bal- 500
+ance scores produced by the proposed method in 501
+OCEAN classes than baselines. EviOCEAN offers 502
+a flexible way to integrate social science into per- 503
+sonality inference with any LLMs. Future work 504
+will consider multilingual settings, additional text 505
+genres, and more efficient evidence assessment.506
+8
+
+PAGE 9
+Limitations507
+Although promising results have been achieved,508
+the proposed method has the following limitations.509
+First, the evaluation covers four primarily English-510
+language datasets and several text genres, so fur-511
+ther study is needed for multilingual and culturally512
+varied settings. Second, the proposed method fol-513
+lows the binary high/low labels provided by the514
+selected benchmarks; continuous trait scores may515
+offer a more detailed representation of personality.516
+Finally, the multi-agent process requires more in-517
+ference time and API calls than direct prompting,518
+although the reported efficiency is more favorable519
+than the larger PADO pipeline. We acknowledge520
+this limitation because of higher latency and cost521
+compared to direct prompting; however, a more522
+sophisticated design is also encouraged.523
+Ethics Statement524
+We confirm that this study has no ethical issues.525
+This study uses existing personality benchmarks526
+and involves no new data collection or direct par-527
+ticipant interaction. Personality inference is inher-528
+ently sensitive because textual observations may529
+contain private information, and predicted traits530
+may be uncertain or affected by social and cultural531
+context. EviOCEAN should therefore be treated as532
+a research framework rather than a tool for clini-533
+cal assessment or automated decisions concerning534
+employment, education, insurance, or access to535
+services. Practical use should follow the licenses536
+and data-governance requirements of the source537
+datasets, obtain appropriate consent, minimize re-538
+tained personal information, and include human539
+oversight. Results should be interpreted at an ag-540
+gregate level where possible and should not be used541
+to stereotype or disadvantage individuals or groups.542
+All annotators agreed to involve human evaluation543
+with a clear provided guideline. We did not use and544
+store any personal information of the annotators.545
+The corresponding code and datasets were obtained546
+from publicly available GitHub repositories linked547
+in the original papers. To ensure a fair compari-548
+son, we did not perform method-specific parameter549
+tuning during the experiments.550
+References551
+Mario Ezra Aragón, Marcos Fernandez-Pichel, and552
+David E Losada. 2026. Personality traits and demo-553
+graphics analysis in online mental health discourse.554
+IEEE Transactions on Affective Computing.555
+Pranav Bhandari, Usman Naseem, Amitava Datta, Nico- 556
+las Fay, and Mehwish Nasim. 2025. Evaluating per- 557
+sonality traits in large language models: Insights 558
+from psychological questionnaires. InCompanion 559
+Proceedings of the ACM on Web Conference 2025, 560
+pages 868–872.561
+Joan-Isaac Biel, Vagia Tsiminaki, John Dines, and 562
+Daniel Gatica-Perez. 2013. Hi youtube! personality 563
+impressions and verbal content in social video. In 564
+Proceedings of the 15th ACM on International con- 565
+ference on multimodal interaction, pages 119–126.566
+Yuan Cao, Feixiang Liu, Wang Xinyue, Yihan Zhu, 567
+Hui Xu, Wang Zheng, and Qiang Qiu. 2026. From 568
+classification to ranking: Enhancing llm reasoning 569
+capabilities for mbti personality detection. InLogi- 570
+cal and Symbolic Reasoning in Language Models@ 571
+AAAI 2026.572
+Fabio Celli, Fabio Pianesi, David Stillwell, and Michal 573
+Kosinski. 2013. Workshop on computational person- 574
+ality recognition: Shared task. InProceedings of 575
+the international AAAI conference on web and social 576
+media, volume 7, pages 2–5.577
+Francesco Di Cursi, Chiara Boldrini, Marco Conti, and 578
+Andrea Passarella. 2025. Mind reading or misread- 579
+ing? LLMs on the Big Five personality test.arXiv 580
+preprint arXiv:2511.23101.581
+Esin Durmus, He He, and Mona Diab. 2020. FEQA: A 582
+question answering evaluation framework for faith- 583
+fulness assessment in abstractive summarization. In 584
+Proceedings of the 58th Annual Meeting of the Asso- 585
+ciation for Computational Linguistics, pages 5055– 586
+5070, Online. Association for Computational Lin- 587
+guistics.588
+Alexander R. Fabbri, Wojciech Kry´sci´nski, Bryan Mc- 589
+Cann, Caiming Xiong, Richard Socher, and Dragomir 590
+Radev. 2021. SummEval: Re-evaluating summariza- 591
+tion evaluation.Transactions of the Association for 592
+Computational Linguistics, 9:391–409.593
+Qixiang Fang, Anastasia Giachanou, Ayoub Bagheri, 594
+Laura Boeschoten, Erik-Jan van Kesteren, 595
+Mahdi Shafiee Kamalabad, and Daniel Ober- 596
+ski. 2023. On text-based personality computing: 597
+Challenges and future directions. InFindings of the 598
+association for computational linguistics: ACL 2023, 599
+pages 10861–10879.600
+William Fleeson. 2001. Toward a structure- and process- 601
+integrated view of personality: Traits as density dis- 602
+tributions of states.Journal of Personality and Social 603
+Psychology, 80(6):1011–1027.604
+William Fleeson and Eranda Jayawickreme. 2015. 605
+Whole trait theory.Journal of research in personality, 606
+56:82–92.607
+Joseph L. Fleiss. 1971. Measuring nominal scale agree- 608
+ment among many raters.Psychological Bulletin, 609
+76(5):378–382.610
+9
+
+PAGE 10
+David C. Funder. 1995. On the accuracy of personal-611
+ity judgment: A realistic approach.Psychological612
+Review, 102(4):652–670.613
+Isabel O Gallegos, Ryan A Rossi, Joe Barrow,614
+Md Mehrab Tanjim, Sungchul Kim, Franck Dernon-615
+court, Tong Yu, Ruiyi Zhang, and Nesreen K Ahmed.616
+2024. Bias and fairness in large language models: A617
+survey.Computational linguistics, 50(3):1097–1179.618
+Matej Gjurkovi´c, Vanja M Karan, Iva Vukojevi´c, Mi-619
+haela Bošnjak, and Jan Šnajder. 2021. Pandora talks:620
+Personality and demographics on reddit. InProceed-621
+ings of the ninth international workshop on natural622
+language processing for social media, pages 138–623
+152.624
+Lewis R Goldberg. 1992. The development of mark-625
+ers for the big-five factor structure.Psychological626
+assessment, 4(1):26–42.627
+Jan Hofmann, Cornelia Sindermann, and Roman628
+Klinger. 2025. Prompt-based personality profiling:629
+Reinforcement learning for relevance filtering. In630
+Proceedings of the 1st Workshop for Research on631
+Agent Language Models, pages 1–16.632
+Linmei Hu, Hongyu He, Duokang Wang, Ziwang Zhao,633
+Yingxia Shao, and Liqiang Nie. 2024. Llm vs small634
+model? large language model based text augmenta-635
+tion enhanced personality detection model. InPro-636
+ceedings of the AAAI conference on artificial intelli-637
+gence, volume 38, pages 18234–18242.638
+Eranda Jayawickreme, Corinne E Zachry, and William639
+Fleeson. 2019. Whole trait theory: An integrative640
+approach to examining personality structure and pro-641
+cess.Personality and individual differences, 136:2–642
+11.643
+Elma Kerz, Yu Qiao, Sourabh Zanwar, and Daniel644
+Wiechmann. 2022. Pushing on personality detec-645
+tion from verbal behavior: A transformer meets text646
+contours of psycholinguistic features. InProceedings647
+of the 12th Workshop on Computational Approaches648
+to Subjectivity, Sentiment and Social Media Analy-649
+sis, pages 182–194, Dublin, Ireland. Association for650
+Computational Linguistics.651
+Ryan Koo, Minhwa Lee, Vipul Raheja, Jong Inn Park,652
+Zae Myung Kim, and Dongyeop Kang. 2024. Bench-653
+marking cognitive biases in large language models as654
+evaluators. InFindings of the Association for Com-655
+putational Linguistics: ACL 2024, pages 517–545.656
+Wenkai Li, Jiarui Liu, Andy Liu, Xuhui Zhou, Mona T.657
+Diab, and Maarten Sap. 2025a. BIG5-CHAT: Shap-658
+ing LLM personalities through training on human-659
+grounded data. InProceedings of the 63rd Annual660
+Meeting of the Association for Computational Lin-661
+guistics (Volume 1: Long Papers), pages 20434–662
+20471, Vienna, Austria. Association for Computa-663
+tional Linguistics.664
+Zheng Li, Sujian Li, Dawei Zhu, Qilong Ma, and 665
+Weimin Xiong. 2025b. Eerpd: Leveraging emotion 666
+and emotion regulation for improving personality de- 667
+tection. InProceedings of the 31st International Con- 668
+ference on Computational Linguistics, pages 7721– 669
+7734, Abu Dhabi, UAE. Association for Computa- 670
+tional Linguistics.671
+Hao Lin, Leixiao Li, Yongxin Zhao, and Yumeng Zhao. 672
+2026. Personalityllm: A zero-shot detection method 673
+for big five personality traits from social avatars. 674
+IEEE Transactions on Computational Social Systems. 675
+Yang Liu, Dan Iter, Yichong Xu, Shuohang Wang, 676
+Ruochen Xu, and Chenguang Zhu. 2023. G-eval: 677
+NLG evaluation using GPT-4 with better human 678
+alignment. InProceedings of the 2023 Conference 679
+on Empirical Methods in Natural Language Process- 680
+ing, pages 2511–2522, Singapore. Association for 681
+Computational Linguistics.682
+François Mairesse, Marilyn A. Walker, Matthias R. 683
+Mehl, and Roger K. Moore. 2007. Using linguis- 684
+tic cues for the automatic recognition of personality 685
+in conversation and text.Journal of Artificial Intelli- 686
+gence Research, 30:457–500.687
+Simon Malberg, Roman Poletukhin, Carolin M Schuster, 688
+and Georg Groh. 2025. A comprehensive evaluation 689
+of cognitive biases in llms. InProceedings of the 690
+5th International Conference on Natural Language 691
+Processing for Digital Humanities, pages 578–613.692
+John D Mayer. 2015. The personality systems frame- 693
+work: Current theory and development.Journal of 694
+Research in Personality, 56:4–14.695
+Dan P McAdams and Jennifer L Pals. 2006. A new big 696
+five: fundamental principles for an integrative science 697
+of personality.American psychologist, 61(3):204.698
+Ranjita Naik, Varun Chandrasekaran, Mert Yuksek- 699
+gonul, Hamid Palangi, and Besmira Nushi. 2024. 700
+Diversity of thought improves reasoning abilities of 701
+llms.Preprint, arXiv:2310.07088.702
+Ani Nenkova and Rebecca Passonneau. 2004. Evaluat- 703
+ing content selection in summarization: The pyramid 704
+method. InProceedings of the Human Language 705
+Technology Conference of the North American Chap- 706
+ter of the Association for Computational Linguistics: 707
+HLT-NAACL 2004, pages 145–152, Boston, Mas- 708
+sachusetts, USA. Association for Computational Lin- 709
+guistics.710
+James W Pennebaker, Martha E Francis, Roger J Booth, 711
+et al. 2001. Linguistic inquiry and word count: 712
+Liwc 2001.Mahway: Lawrence Erlbaum Associates, 713
+71(2001):2001.714
+James W. Pennebaker and Laura A. King. 1999. Lin- 715
+guistic styles: Language use as an individual differ- 716
+ence.Journal of Personality and Social Psychology, 717
+77(6):1296–1312.718
+10
+
+PAGE 11
+Haocong Rao, Cyril Leung, and Chunyan Miao. 2023.719
+Can chatgpt assess human personalities? a general720
+evaluation framework. InFindings of the Association721
+for Computational Linguistics: EMNLP 2023, pages722
+1184–1194.723
+Sanja Štajner and Seren Yenikent. 2020. A survey of724
+automatic personality detection from texts. InPro-725
+ceedings of the 28th international conference on com-726
+putational linguistics, pages 6284–6295.727
+Lei Sun, Jinming Zhao, and Qin Jin. 2024. Reveal-728
+ing personality traits: A new benchmark dataset729
+for explainable personality recognition on dialogues.730
+InProceedings of the 2024 Conference on Empiri-731
+cal Methods in Natural Language Processing, pages732
+19988–20002, Miami, Florida, USA. Association for733
+Computational Linguistics.734
+Miles Turpin, Julian Michael, Ethan Perez, and Samuel735
+Bowman. 2023. Language models don’t always say736
+what they think: Unfaithful explanations in chain-of-737
+thought prompting.Advances in Neural Information738
+Processing Systems, 36:74952–74965.739
+Adithya V Ganesan, Yash Kumar Lal, August Nilsson,740
+and H. Andrew Schwartz. 2023. Systematic evalua-741
+tion of GPT-3 for zero-shot personality estimation.742
+InProceedings of the 13th Workshop on Computa-743
+tional Approaches to Subjectivity, Sentiment, and744
+Social Media Analysis, pages 390–400.745
+Feifan Yang, Xiaojun Quan, Yunyi Yang, and Jianxing746
+Yu. 2021. Multi-document transformer for personal-747
+ity detection. InProceedings of the AAAI Conference748
+on Artificial Intelligence, volume 35, pages 14221–749
+14229.750
+Tao Yang, Tianyuan Shi, Fanqi Wan, Xiaojun Quan,751
+Qifan Wang, Bingzhe Wu, and Jiaxiang Wu. 2023.752
+PsyCoT: Psychological questionnaire as powerful753
+chain-of-thought for personality detection. InFind-754
+ings of the Association for Computational Linguis-755
+tics: EMNLP 2023, pages 3305–3320, Singapore.756
+Association for Computational Linguistics.757
+Haein Yeo, Taehyeong Noh, Seungwan Jin, and758
+Kyungsik Han. 2025. PADO: Personality-induced759
+multi-agents for detecting OCEAN in human-760
+generated texts. InProceedings of the 31st Inter-761
+national Conference on Computational Linguistics,762
+pages 5719–5736, Abu Dhabi, UAE. Association for763
+Computational Linguistics.764
+Wu Youyou, David Stillwell, H Andrew Schwartz, and765
+Michal Kosinski. 2017. Birds of a feather do flock766
+together: Behavior-based personality-assessment767
+method reveals personality similarity among couples768
+and friends.Psychological science, 28(3):276–284.769
+Minjun Zhu, Yixuan Weng, Linyi Yang, and Yue Zhang.770
+2025. Personality alignment of large language mod-771
+els. InInternational Conference on Learning Repre-772
+sentations, volume 2025, pages 14206–14255.773
+A Appendix774
+A.1 Psychological Indicator Description775
+Table 10 summarizes the evidence represented by 776
+each indicator.777
+Table 10: Description of the seven psychological indica-
+tors.
+Indicator Description
+Emotions Affective experiences expressed in the
+text, including their intensity, dura-
+tion, regulation, and recovery. Re-
+peated emotional patterns may suggest
+a broader tendency, whereas a brief re-
+action may reflect a temporary situa-
+tion.
+Cognition Patterns of reasoning, reflection, atten-
+tion, interpretation, and mental flexibil-
+ity. This indicator helps separate a re-
+curring way of processing experience
+from thoughts prompted by one topic or
+task.
+Sociality The frequency and quality of social in-
+teraction, relationship preferences, co-
+operation, conflict, and social motives.
+A reference to other people alone is in-
+sufficient without evidence of the au-
+thor’s own interaction pattern.
+Motivation/
+Goals
+Intentions, priorities, effort, persis-
+tence, and responses to progress or set-
+backs. Repeated goal pursuit provides a
+broader signal than a short-term obliga-
+tion or an isolated statement of intent.
+Behavior/
+Habits
+Observable actions, routines, task man-
+agement, and follow-through across sit-
+uations. Recurring behavior offers more
+stable evidence than plans, preferences,
+or intentions that are not enacted.
+Self-concept/
+Identity
+The author’s self-descriptions, values,
+social roles, and perceived strengths or
+limitations. These statements indicate
+how the author understands the self,
+while still requiring support from con-
+text or behavior.
+Environment/
+Context
+External demands, life events, set-
+tings, role constraints, and other circum-
+stances surrounding the evidence. This
+indicator helps determine whether an
+observed response is context-specific
+rather than a general personal tendency.
+Together, the indicators connect observable 778
+states, social-cognitive processes, identity, and 779
+context described in broader personality accounts 780
+(Fleeson and Jayawickreme, 2015; Jayawickreme 781
+et al., 2019; Mayer, 2015; McAdams and Pals, 782
+2006). They serve as evidence categories rather 783
+than independent traits or final labels.784
+11
+
+PAGE 12
+A.2 Psychology Extraction and785
+Summarization Assessment786
+This section provides further details on the evalua-787
+tion summarized in Section 5.2.3.788
+Three annotators independently assessed 100789
+samples drawn from ESSAYS and My Personality.790
+For each sample, the source text was presented with791
+either its Evidence Summary or seven-indicator792
+record; reference traits and final predictions were793
+not shown. The annotators ratedFaithfulness,794
+whether the evidence is supported and correctly at-795
+tributed;Relevance, whether it is useful for person-796
+ality inference; andCoverage, whether the main797
+evidence, counterevidence, and contextual cues are798
+retained (Durmus et al., 2020; Fabbri et al., 2021;799
+Nenkova and Passonneau, 2004). Each criterion800
+used a five-point scale, from substantial problems801
+(1), through partial satisfaction (3), to strong satis-802
+faction (5). The ratings indicate substantial agree-803
+ment (Fleiss’ κ= 0.78 ) (Fleiss, 1971). All annota-804
+tors agreed to involve this annotation process with a805
+clear provided guideline. We did not use and store806
+any personal information of the annotators. GPT-807
+4.1 applied the same rubric to all test samples as808
+a complementary judge (Liu et al., 2023). Table 8809
+shows similar human and model trends: summaries810
+receive higher Faithfulness, while indicators re-811
+ceive higher Relevance and Coverage, consistent812
+with their compact and structured evidence views.813
+A.3 Output Observation814
+Table 11 compares trait-level predictions for two815
+selected samples. For S1, EviOCEAN matches all816
+five traits, including the threeLOWlabels, while817
+PADO and the baseline miss one and twoLOW818
+traits, respectively. For S2, EviOCEAN correctly819
+identifies bothLOWtraits but misclassifies Agree-820
+ableness, giving four correct predictions. This pat-821
+tern may reflect EviOCEAN’s assessment of both822
+supporting and opposing evidence before the final823
+decision, which helps prevent weakerHIGHcues824
+from overshadowing relevantLOWevidence. These825
+cases illustrate more consistent decisions across826
+high and low trait labels.827
+A.4 Agent Outputs828
+Table 12 presents a shortened inference trace for829
+PANDORA author 6011, whose reference profile830
+is H/H/L/L/L. The input contains mixed cues, in-831
+cluding helping behavior, repeated solitary activi-832
+ties, confrontational language, long-term task pur-833
+Table 11: Trait outputs for selected cases. S1 denotes
+PANDORA author 6011 (GPT-5), and S2 denotes ES-
+SAYS sample 2000_750679.txt (GPT-4o). H/L:
+HIGH/LOW; bold predictions match the reference.
+Sample Method O C E A N Correct
+S1
+Reference H H L L L –
+BaselineH HHLH 3/5
+PADOH H L LH 4/5
+EviOCEANH H L L L 5/5
+S2
+Reference H L L H H –
+Baseline HHHHL 2/5
+PADOH LH LH3/5
+EviOCEANH L LLH 4/5
+suit, and situational anxiety with coping strategies. 834
+The baseline predicts H/H/H/L/H: it identifies low 835
+Agreeableness but appears to interpret social men- 836
+tions and distress as high Extraversion and Neu- 837
+roticism without fully considering their context. 838
+PADO predicts H/H/L/L/H and recovers low Ex- 839
+traversion and Agreeableness, although temporary 840
+anxiety remains associated with high Neuroticism 841
+despite the author’s description of regulation and 842
+recovery.843
+EviOCEAN first organizes the author’s behav- 844
+ior, emotional regulation, goals, identity, and cir- 845
+cumstances through the Evidence Summarizer and 846
+seven indicators. This representation places anx- 847
+iety beside deliberate coping, practical support 848
+beside a repeated preference for solitude, and 849
+emotional expression beside military shifts and 850
+sleep deprivation. Preliminary Trait Inference 851
+produces H/H/L/H/H, reflecting a shallow asso- 852
+ciation between helping and high Agreeableness, 853
+and between distress and high Neuroticism. The 854
+High-trait Evidence Validator retains support for 855
+high Openness and Conscientiousness but regards 856
+the other high interpretations as weak or context- 857
+dependent. The Low-trait Disambiguator then re- 858
+lates voluntary solitude to low Extraversion, recur- 859
+ring hostile expression to low Agreeableness, and 860
+recovery from situational anxiety to low Neuroti- 861
+cism. As the valid high and low assessments do not 862
+conflict, the Conflict Arbitrator is not invoked. The 863
+Deterministic Router combines the supported deci- 864
+sions into H/H/L/L/L. This example illustrates how 865
+recurrence, counterevidence, and context may help 866
+distinguish temporary states from broader tenden- 867
+cies. It clarifies the inference process rather than 868
+serving as a general performance claim; textual 869
+outputs are shortened for readability.870
+12
+
+PAGE 13
+Table 12: Condensed outputs for PANDORA author 6011 using GPT-5. Trait labels follow the order O/C/E/A/N.
+H/L denotesHIGH/LOW.
+Method or stage Output Condensed evidence or reasoning
+Reference H/H/L/L/L Ground-truth trait profile.
+Sample content – “I just like being alone”; “I definitely will go to movies, dinner, and bars by myself”;
+“Set goals. If you can set aside time to get X amount of rows per day, then try to meet
+those goals”; and “I have learned to manage it ... remember to breathe.”
+Baseline H/H/H/L/H (3/5) Correctly identifies low Agreeableness but interprets social expression and situational
+distress as high Extraversion and Neuroticism.
+PADO H/H/L/L/H (4/5) Comparative reasoning identifies low Extraversion and Agreeableness but retains the
+situational high-Neuroticism interpretation.
+EviOCEAN
+Evidence Summarizer Evidence view An independent Navy service member manages demanding schedules, completes long
+projects, helps others, and regulates stress tied to identifiable situations.
+Indicator Extractor
+Emotion Strong enthusiasm, anger, and hurt coexist with deliberate self-soothing and recovery.
+Cognition The author analyzes coping strategies, sets goals, and records mistakes to improve later
+work.
+Sociality They repeatedly choose solo activities but also provide practical help, affection, and
+encouragement.
+Motivation/Goals Daily crafting targets, learning aims, health regulation, and practical financial goals are
+stated.
+Behavior/Habits Sustained crochet sessions, project completion, solo outings, and moderated drinking
+recur in the text.
+Self-concept/Identity The author describes being independent, secular, playful, and comfortable with solitude,
+alongside a Navy identity.
+Environment/Context Military shifts, sleep deprivation, mobility, and online communities constrain how
+emotional cues should be interpreted.
+Preliminary Trait Inference H/H/L/H/H Chosen solitude supports low Extraversion, but helping behavior and situational distress
+lead to high Agreeableness and Neuroticism.
+High-trait level evidence validator Valid H: O, C High Extraversion lacks direct social-drive evidence, high Agreeableness is weakened
+by repeated hostile remarks, and high Neuroticism relies mainly on temporary stress.
+Low-trait level disambiguation Confirmed L: E, A, N V oluntary solitude supports low Extraversion, recurrent confrontational language sup-
+ports low Agreeableness, and practiced coping supports low Neuroticism.
+Conflict Arbitrator Not invoked No trait has valid evidence for both directions.
+Deterministic Router Select L: E, A, N Selects the confirmed low labels for Extraversion, Agreeableness, and Neuroticism.
+Final Decision H/H/L/L/L (5/5) Final trait profile produced by the complete framework.
+A.5 Prompts871
+Table 13 reports the semantic prompts used by872
+the six role-specialized agents in EviOCEAN.873
+Provider-specific formatting instructions are omit-874
+ted. All prompts are zero-shot and contain no875
+demonstrations, dataset identity, label prevalence,876
+ground-truth information, or target metric. Missing877
+evidence is treated as uncertainty rather than sup-878
+port for either trait level. The Deterministic Router879
+does not use an LLM prompt; it combines the agent880
+outputs according to Algorithm 1.881
+13
+
+PAGE 14
+Table 13: Prompts used by the six role-specialized agents in EviOCEAN.
+Method Prompt
+Evidence Summarizer
+You are an evidence-preserving summarizer. Given the segmented text written by one individual, produce 6–10 concise sentences.
+Retain enacted behavior, routines, task handling, emotional expression and regulation, social motives, relationships, goals,
+follow-through, cognitive style, self-description, context, counterevidence, and mixed signals. Separate the author’s behavior
+from quotations, reposts, discussed people, and hypothetical examples. Mark whether evidence is repeated or context-specific.
+Do not infer stability from text length or topic repetition, and do not predict Big Five labels. Return only the evidence summary.
+Indicator Extractor
+You are a psycholinguistic evidence extractor. Analyze: (1) Emotions, (2) Cognition, (3) Sociality, (4) Motivation/Goals,
+(5) Behavior/Habits, (6) Self-concept/Identity, and (7) Environment/Context. For each indicator, identify author-owned
+direct evidence, counterevidence, stability, and contextual scope. Separate behavior from intentions, topics, quotations,
+and platform activity. Retain sparse relevant cues with their limitations; do not invent evidence or assign trait labels.
+Return seven numbered explanations and a short overall evidence profile.
+Preliminary Trait Inference
+Given the Evidence Summary and seven indicator explanations, provide a provisional estimate of the five Big Five traits.
+Score O, C, E, A, and N from 0 to 10; scores at or above 5 areHIGH, and lower scores areLOW. Assess both
+directions using the same standard. Prefer author-owned, trait-specific behavior and explicit self-description over topic
+breadth, writing style, or temporary states. Count duplicated evidence once. Keep mixed or sparse cases near the midpoint
+and explain uncertainty rather than inferring a label from absence. Return orderedTRAIT,SCORE, andNARRATIVErecords.
+High-trait level evidence validator
+Independently validate high-trait evidence using the original text, Evidence Summary, and seven indicators. Do not use the
+preliminary prediction or choose the final label. For each trait, require author-owned, trait-specific behavior, motive,
+preference, or self-description, and consider repetition, centrality, scope, and consequences. Reject quotations, discussed
+people, topic volume, platform activity, and temporary states as standalone evidence. For N, distinguish recurring instability
+from temporary stress or a single episode. Return validity, evidence, counterevidence, ownership, stability, scope, and explanation.
+Low-trait level disambiguation
+Independently examine all low-trait evidence using the original text, Evidence Summary, and seven indicators. Do not use the
+preliminary or high-trait decisions or choose the final label. Test cues for rigidity or novelty rejection (O), unreliable
+follow-through (C), chosen and valued solitude (E), antagonism or disregard (A), and emotional stability or resilience (N).
+Do not infer low from missing high evidence. Separate stable behavior from loneliness, situational anger, one missed task,
+temporary pressure, or silence. Return confirmation, grounded evidence, ownership, stability, scope, confound, and explanation.
+Conflict Arbitrator
+For a trait with valid evidence in both directions, use the original text, Evidence Summary, indicators, preliminary inference,
+and high- and low-trait assessments. Compare both directions by directness, author ownership, trait relevance, stability, scope,
+and consequence. Use the original text as primary evidence and count duplicated evidence once. Prefer repeated enacted behavior
+over topics, temporary states, or platform activity. Select the clearer direction; if evidence remains balanced, retain the
+preliminary decision and state the limitation. ReturnTRAIT, finalLABEL,SCORE, evidence, and reason.
+14

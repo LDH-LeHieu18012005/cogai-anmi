@@ -52,14 +52,6 @@
 **/.auth/
 **/storage-state*.json
 
-# Original submissions and research copies: retain locally; review before publishing
-/README.txt
-/DANH_GIA_SAN_PHAM_COGAI.md
-/Bao cao AnMi/
-/Tài liệu/
-/Paper/
-/Hinh anh CogAI/
-/research/
 
 # Operational records and build configuration containing the live endpoint
 /cogai/docs/NAP_ROBOT_ANMI_20261031.md
@@ -67,3 +59,11 @@
 /cogai/docs/huong-dan-demo/
 /cogai/firmware/host-test-result.json
 /cogai/firmware/xiaozhi-esp32/main/boards/ricky-war-tank/config.json
+
+# Reproducibility exceptions (reviewed: no personal data, no credentials)
+# Public knowledge cards so CogRAG and the demo seed work right after cloning.
+!cogai/backend/data/
+cogai/backend/data/*
+!cogai/backend/data/knowledge.sqlite3
+# Archived pitch packages (reports, slide sources) kept with the documents.
+!Bao cao AnMi/_Luu_tru/*.zip

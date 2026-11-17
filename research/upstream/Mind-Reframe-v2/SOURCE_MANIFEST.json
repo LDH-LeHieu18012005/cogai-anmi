@@ -1,0 +1,333 @@
+{
+  "repo": "Anonymous-EmpathyAI/Mind-Reframe-v2",
+  "revision": "3dace8bad1eb73ec75deec7fa800376bc8cf83a9",
+  "license": "apache-2.0",
+  "excluded": "Environment files, runtime logs, feedback data, compiled files and assets",
+  "files": [
+    {
+      "path": "ai-core/app/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "ai-core/app/api/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "ai-core/app/api/v1/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "ai-core/app/api/v1/endpoints/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "ai-core/app/api/v1/endpoints/cache.py",
+      "sha256": "28a80c277daff260309ca78c1aa29266070a42cd4488b7e87ee4253915bdc5bc",
+      "bytes": 2369
+    },
+    {
+      "path": "ai-core/app/api/v1/endpoints/chat.py",
+      "sha256": "074172af0e45b7d692959896d900c676d504ee54d6a51598bfb572d81a08f67d",
+      "bytes": 2618
+    },
+    {
+      "path": "ai-core/app/api/v1/endpoints/completion.py",
+      "sha256": "ee8c9b794b7d054b846fff8b8967f627597e9c1611d2dfa4caa8a1fac80f3584",
+      "bytes": 944
+    },
+    {
+      "path": "ai-core/app/api/v1/endpoints/health.py",
+      "sha256": "8b89411839518bfcc0880b45604decc31ee6e17e082f966212d6e8e7520b4a4a",
+      "bytes": 800
+    },
+    {
+      "path": "ai-core/app/api/v1/endpoints/prompts.py",
+      "sha256": "e664e1b33c4be60dbfb5dd7a64c42c7fb6831936fee06aa063db44f4a877c926",
+      "bytes": 4366
+    },
+    {
+      "path": "ai-core/app/api/v1/router.py",
+      "sha256": "3b3cba24c8dccd77892aeaabec356a122fdfeed53cf5f72d32a902e20eab3d11",
+      "bytes": 554
+    },
+    {
+      "path": "ai-core/app/config.py",
+      "sha256": "cf87bc38a5b32e8d20eeb7692acce79e0f951ec3a7a92605cf054549228fd0d3",
+      "bytes": 1448
+    },
+    {
+      "path": "ai-core/app/core/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "ai-core/app/core/cache/base.py",
+      "sha256": "93994b9c64f87c9ab7437aa29c5a0510f9072f21750c2b787ce83f37e2f95951",
+      "bytes": 2069
+    },
+    {
+      "path": "ai-core/app/core/cache/manager.py",
+      "sha256": "c2b73c7993dcd703a6ff804f92bb3bdde371b1bba2bf9e2867d41af85ab97519",
+      "bytes": 2618
+    },
+    {
+      "path": "ai-core/app/core/cache/memory.py",
+      "sha256": "c6b392c29cae5e75300774ab3151d27a13041935a019dac922a8bb0493f36f1f",
+      "bytes": 3010
+    },
+    {
+      "path": "ai-core/app/core/cache/redis.py",
+      "sha256": "8fa80ac6efb600df6a54b4747f5e9b9078c12479e28dd55f18932a994b5c372d",
+      "bytes": 4333
+    },
+    {
+      "path": "ai-core/app/core/llm/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "ai-core/app/core/llm/base.py",
+      "sha256": "95b5e9fa0828fd74970712bf4af383c2152e3787b0e61f21c642617c64040488",
+      "bytes": 1419
+    },
+    {
+      "path": "ai-core/app/core/llm/client.py",
+      "sha256": "a92cefa888ff72b304df530bc422cc18161a45ea7e498dd47a03f44b8ed54e86",
+      "bytes": 2451
+    },
+    {
+      "path": "ai-core/app/core/llm/providers/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "ai-core/app/core/llm/providers/groq.py",
+      "sha256": "751b170e895e5cf08bed5265f6274e08d29da5da3e4edd48660642076580ed13",
+      "bytes": 4741
+    },
+    {
+      "path": "ai-core/app/core/llm/providers/openai.py",
+      "sha256": "6dd21ee5e1a46754582629719db35274b272f1f0424be5ab333c1bdd4651080c",
+      "bytes": 4702
+    },
+    {
+      "path": "ai-core/app/core/prompts/base.py",
+      "sha256": "0617539ff0edc0a3797043090daf2830f2ab69ab3c1f89af386b4df1b6b70910",
+      "bytes": 2586
+    },
+    {
+      "path": "ai-core/app/core/prompts/manager.py",
+      "sha256": "beb953787e0ea7675cc14478e0729043a23081878d6592d50c5e552243d92d9d",
+      "bytes": 5379
+    },
+    {
+      "path": "ai-core/app/core/prompts/templates/__init__.py",
+      "sha256": "9cde464bc70efa43eb9e24fdec4134d7d01f19aad348e466765dccb8eb006ff8",
+      "bytes": 96
+    },
+    {
+      "path": "ai-core/app/core/prompts/templates/chat.py",
+      "sha256": "9799b12cdad5d53de2dff0eb2ff19390aa2458d50e30366f669ea25eaca8d92f",
+      "bytes": 1751
+    },
+    {
+      "path": "ai-core/app/core/prompts/templates/DoT.py",
+      "sha256": "0b7bac54d69b029a07308f9f950443c4de85a782e8da63993d26262e348f743a",
+      "bytes": 10322
+    },
+    {
+      "path": "ai-core/app/core/prompts/templates/extraction.py",
+      "sha256": "5f8f4c880f3c3fd9334e54218faeb4db1fe496566121cb44220c4a6acf582a77",
+      "bytes": 1629
+    },
+    {
+      "path": "ai-core/app/core/prompts/templates/reframe.py",
+      "sha256": "58118b3b25057369539705c8ae6053296b070600e9372189f7e40b43c63ed5b0",
+      "bytes": 21637
+    },
+    {
+      "path": "ai-core/app/core/prompts/templates/summarization.py",
+      "sha256": "82f73c0e9bfe9206028659005684328a7f798ac4b8c44062420acb1f72da3f27",
+      "bytes": 1466
+    },
+    {
+      "path": "ai-core/app/main.py",
+      "sha256": "db6d779393a0a5a5729caaa9aff139f5c7ad0a3c9f91cfb9f820b9a75857e29e",
+      "bytes": 4922
+    },
+    {
+      "path": "ai-core/app/middleware/auth.py",
+      "sha256": "cba668c5d16090c7a5e484925d5ebcfe6f4bae10e940da1d8b5cad1c6dfeb13f",
+      "bytes": 2735
+    },
+    {
+      "path": "ai-core/app/middleware/logging.py",
+      "sha256": "0139ff37920e4a4009649b1c65b429415039a462281b3e293576cd59bfcbdb97",
+      "bytes": 2308
+    },
+    {
+      "path": "ai-core/app/middleware/rate_limit.py",
+      "sha256": "ef71ec8d33d2186d127eecfbd579321fb222d069810afe6a074c5ea56123c500",
+      "bytes": 1158
+    },
+    {
+      "path": "ai-core/app/models/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "ai-core/app/models/prompts.py",
+      "sha256": "e4369771eb6f7d3d16516ae32b4785c9e2bd502b1ad17c927efbc1ad5ea663eb",
+      "bytes": 4201
+    },
+    {
+      "path": "ai-core/app/models/requests.py",
+      "sha256": "510b6e918fa3d52938ca8b174c987d9a8e2ac7fd38d368e6fdd4736c9bc50be2",
+      "bytes": 2836
+    },
+    {
+      "path": "ai-core/app/models/responses.py",
+      "sha256": "1d17c421b4df3d02cd1a178e281d5f341c6272f16646acbea3dcdb936426741b",
+      "bytes": 3387
+    },
+    {
+      "path": "ai-core/app/services/chat_service.py",
+      "sha256": "f7440c727224aebf85dae2970b5e8ee1cf70273b78645d64eb83c62e9dd49871",
+      "bytes": 5529
+    },
+    {
+      "path": "ai-core/app/services/completion_service.py",
+      "sha256": "c13ade9b3992d06cf546f7671dc83bc8776f48cb1306982a0622abf20ef50042",
+      "bytes": 1274
+    },
+    {
+      "path": "ai-core/app/services/prompt_service.py",
+      "sha256": "0ab1b651b29e8b4cb79797fd7ce55d2d72e791316899db3374afc7a697eabc9a",
+      "bytes": 7385
+    },
+    {
+      "path": "ai-core/app/utils/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "ai-core/app/utils/errors.py",
+      "sha256": "c35f91b45bc1dc78f7ea036f22188e1b255cdcf145e633c165270ce16c26d70b",
+      "bytes": 2586
+    },
+    {
+      "path": "ai-core/app/utils/logger.py",
+      "sha256": "4bf68cdd732add97bbe67c64251e4fb419684e4498004fb2e9de02c1ecd64c4f",
+      "bytes": 2699
+    },
+    {
+      "path": "ai-core/README.md",
+      "sha256": "746c5914b6d513f9129256719ec3cf69f34c56a4228275dd12757ede4d79e544",
+      "bytes": 4357
+    },
+    {
+      "path": "Dockerfile",
+      "sha256": "444b62441de03f3ab8224a114665878889e58602cdb2e1189080b45f3d6dd0fb",
+      "bytes": 389
+    },
+    {
+      "path": "README.md",
+      "sha256": "82b2624e386be3ce0efce4afdc5c7de25da7b53c34981103de68fafa5ad9b8d3",
+      "bytes": 218
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "f9d57b3bac7caf5db3354640fcbf771ff1b631717ab78b80801871be5e6647f8",
+      "bytes": 278
+    },
+    {
+      "path": "supervisord.conf",
+      "sha256": "7094b6850590e499ff731481d92f28819f4cbe251320f7692d04f11a77a2cb0f",
+      "bytes": 611
+    },
+    {
+      "path": "Web/backend/main.py",
+      "sha256": "46afbe9e4e70252e10cd6d18365d84fe417fb79b57542113e557dae2af7c46eb",
+      "bytes": 25158
+    },
+    {
+      "path": "Web/mind-reframe/eslint.config.js",
+      "sha256": "4efe97b16d1200fac0eaf07aa00930a8668b1f96a0be1891ace8c1e712ff0ccb",
+      "bytes": 616
+    },
+    {
+      "path": "Web/mind-reframe/index.html",
+      "sha256": "6df797af42de1d075ccc92a4bc36abccb996e8a918a44882aa241888accf3924",
+      "bytes": 361
+    },
+    {
+      "path": "Web/mind-reframe/package-lock.json",
+      "sha256": "695100bc28611e88ba46e1a24344a9cec45e45048c3f4f508da68a648b93cd8b",
+      "bytes": 137133
+    },
+    {
+      "path": "Web/mind-reframe/package.json",
+      "sha256": "818270c2e9aa414a54abe58d26a0f9edcb2307ca4f1ff972b2e3e786fca3ee05",
+      "bytes": 909
+    },
+    {
+      "path": "Web/mind-reframe/postcss.config.js",
+      "sha256": "010e8774c76996e28b1f2290d690b3b64f56f2fbe26c747b4419ee0110d0a002",
+      "bytes": 79
+    },
+    {
+      "path": "Web/mind-reframe/README.md",
+      "sha256": "f58b5b17f83db63c09a9f2c059ec435ac8a3feb66f9337391ed5f3f62cff4e63",
+      "bytes": 2555
+    },
+    {
+      "path": "Web/mind-reframe/src/App.css",
+      "sha256": "a0715e0a09edbd0fbde65816a75e0fa0fc8b314c5260c0768c19bf3aac22621a",
+      "bytes": 606
+    },
+    {
+      "path": "Web/mind-reframe/src/App.tsx",
+      "sha256": "967bceab5d2bcc4fe8c33b376c0b025c68bf7269c71065578a90fe89e921c9a1",
+      "bytes": 117029
+    },
+    {
+      "path": "Web/mind-reframe/src/index.css",
+      "sha256": "186419c47e46d1688974fe6d1d4688d7234f1790113a0c1e933526b522c9a04c",
+      "bytes": 58
+    },
+    {
+      "path": "Web/mind-reframe/src/main.tsx",
+      "sha256": "6e9e5807fcbd48b75a96db5cbef36c996262196be42e6d4760dc86babbe61ad2",
+      "bytes": 230
+    },
+    {
+      "path": "Web/mind-reframe/tailwind.config.js",
+      "sha256": "3dd3712212acbc67849a13a9f1401527495e09a1a12e1c417fac6b4ecf1fe6d4",
+      "bytes": 181
+    },
+    {
+      "path": "Web/mind-reframe/tsconfig.app.json",
+      "sha256": "922bc5bfb41bdc0768023b2487d54b3ae23c587d999024d4f32cde879ae6f4d8",
+      "bytes": 732
+    },
+    {
+      "path": "Web/mind-reframe/tsconfig.json",
+      "sha256": "770b4140bbb581e2dfd9ea9946ffc9c75a1d86ba7d2db5f77c83e37cbdf9d808",
+      "bytes": 119
+    },
+    {
+      "path": "Web/mind-reframe/tsconfig.node.json",
+      "sha256": "c3dd0fb522feba3596713f51b95bd53d781d845d24aedbfa2ac093d8b39c5120",
+      "bytes": 653
+    },
+    {
+      "path": "Web/mind-reframe/vite.config.ts",
+      "sha256": "b1cece2442ddb42bd37e6a606b4b563c95d7cfb059ca8751053bec7a43f6d29d",
+      "bytes": 374
+    }
+  ]
+}

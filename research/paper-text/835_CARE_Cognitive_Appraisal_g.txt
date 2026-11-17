@@ -1,0 +1,1645 @@
+
+PAGE 1
+CARE: Cognitive Appraisal-gated Reasoning for Multimodal Emotion
+Recognition in Conversations
+Anonymous ACL submission
+Abstract001
+This paper introduces CARE, a cognitive002
+appraisal-gated multi-agent framework that003
+uses appraisal not only as an emotion cue but004
+also as a control signal for selective reason-005
+ing. For each utterance, CARE extracts an006
+eight-field appraisal state and applies theory-007
+informed deterministic routing rules to six psy-008
+chological and multimodal reasoning agents.009
+Each activated agent produces a source-specific010
+emotion prediction for Weighted Evidence V ot-011
+ing that combines predictions from an always-012
+active Text Agent and an appraisal-based emo-013
+tion predictor. Experimental results on MELD014
+and IEMOCAP show that CARE produces sig-015
+nificant improvements over strong multi-agent016
+methods in the zero-shot setting. Ablation stud-017
+ies indicate that cognitive appraisal provides018
+an effective routing method that offers fewer019
+reasoning agents and a lower inference cost.020
+1 Introduction021
+Emotion recognition in conversation (ERC) is a022
+context-sensitive NLP task that aims to identify023
+the emotion expressed in each utterance within024
+a conversation (Poria et al., 2019b). It serves as025
+a foundational component of empathetic AI sys-026
+tems in applications such as mental health sup-027
+port, customer service, and education (Majumder028
+et al., 2019; Pereira et al., 2025). However, most029
+approaches have still predicted emotions directly030
+from observable conversational evidence using uni-031
+modalities (mainly text) or multimodalities (text,032
+visual cues and speech) (Ghosal et al., 2019, 2020;033
+Hu et al., 2021; Zhang et al., 2025; Lei et al., 2024;034
+Ai et al., 2025; Lyu et al., 2026), while leaving an035
+important intermediate implicit process: How does036
+the speaker cognitively appraise the situation.037
+Psychological theories offer complementary038
+ways to explain how emotions arise (Moors, 2009;039
+Edwards, 1999). Several theories have been applied040
+to improve the reasoning of AI models such as Cog-041
+nitive Behavioral Therapy (CBT) (Beck, 2020) for042
+distortion detection (Chen et al., 2023), personality 043
+traits for capturing relatively stable dispositional 044
+tendencies (Roberts and DelVecchio, 2000; Watson 045
+and Clark, 1992), or social reasoning for relational 046
+meaning (Roberts and DelVecchio, 2000; Watson 047
+and Clark, 1992), Recent studies have introduced 048
+psychological grounding multi-agent frameworks 049
+for ERC (Hotta et al., 2025; Nguyen et al., 2026). 050
+However, applying all indicators to every utter- 051
+ance may be unnecessary. Some utterances can 052
+be recognized from surface context or multimodal 053
+cues alone, while others require deeper reasoning 054
+about subjective belief, social states or personal- 055
+ity evidence (Ghosal et al., 2020; Xu et al., 2024; 056
+Wang et al., 2024). This raises a question: Which 057
+evidence should be considered? We argue that 058
+cognitive appraisal provides a principal method for 059
+this decision. It explains that emotions depend not 060
+only on events or situations themselves, but also on 061
+how individuals evaluate them in relation to their 062
+goals, responsibility, perceived control, certainty, 063
+novelty, and social norms (Lazarus, 1991; Smith 064
+and Ellsworth, 1985; Scherer, 2001). Figure 1 illus- 065
+trates this process using Rachel’s second turn. At 066
+the surface level, the text-only agent predicts the 067
+utterance as neutral due to no strong emotional sig- 068
+nals. However, cognitive appraisal reveals a deeper 069
+interpretation: the situation is highly relevant to 070
+Rachel’s relational goal, involves low perceived 071
+control and uncertainty, and signals possible loss or 072
+separation. Guided by this, DoT and Social gates 073
+are activated because of his subjective belief (re- 074
+lational loss) and a need for reassurance. These 075
+analyses indicate that the utterance expresses a neg- 076
+ative emotion that aligns with sadness (Lazarus, 077
+1991; Hofmann et al., 2020; Troiano et al., 2023). 078
+To answer the question, we introduce CARE 079
+(Cognitive Appraisal-gated Reasoning for Emotion 080
+Recognition), a psychology-guided multi-agent 081
+framework for MERC. CARE uses zero-shot 082
+prompts to guide LLM agents to estimates how 083
+1
+
+PAGE 2
+Joey (Neutral): Okay, how long
+was I watching that woman?
+Rachel (Sadness): I'm just saying
+that y'know, someday Ross is
+gonna meet somebody... Right?
+Joey (Neutral): Yeah, I guess so.
+Rachel (Sadness): I just never
+thought .... Pretty dumb huh?
+Conversation
+Cognitive Appraisal
+Extraction Agent
+    
+  Goal Relevance: high
+  Goal Congruence: mixed
+  ....
+  Certainty: low
+  Affect Intensity: medium
+Rachel
+Deterministic Appraisal Gating
+Appraisal Predictor
+Sadness
+Fear
+Anger
+Neutral
+Prior: Sadness
+Reasoning Agents
+DoT Agent
+Social Agent
+.78
+.14
+.05
+.03
+Subjectivity assessment:
+Rachel objectively worries...
+Contrastive reasoning: Her
+fear comes from thinking Ross...
+Schema analysis: Her
+reasoning is driven by...
+Relationship: Ross may
+become distant.
+Face threat: Rachel exposes...
+Blame: Ross is implicitly seen...
+Support: She seeks Joey’s
+reassurance.
+Norm: A father should stay ...
+Evaluation: Rachel feels ...
+Weighted Evident Voting
+Source Vote
+Text Agent
+DoT
+Social
+Predictor
+Neutral
+Sadness
+Sadness
+Sadness
+Final
+Output
+Sadness
+DoT
+ACTIVATE
+Text Agent
+Input: dialogue text only
+Output: Rachel = Neutral
+Emotion
+Inference Agent
+DoT
+Social
+Emotion: Sadness
+Evident: Explicit
+forecast of Ross
+moving on;...
+Emotion: Sadness
+Evident: Anticipated
+reduction in Ross’s 
+Social
+ACTIVATE
+Distortion
+AcousticVisual
+SKIP SKIP
+SKIP SKIP
+Trait
+Psychological and Multimodal Gates
+Reasoning and Emotion Inference
+Figure 1: CARE uses Appraisal Gating to select information from Cognitive appraisal Extraction. The final
+prediction is produced by Evident V oting that combines Emotion Inference, Text Agent, and Appraisal Predictor.
+the speaker interprets the situation and then uses084
+this appraisal to decide which psychological rea-085
+soning agents should be activated. In parallel, it086
+obtains a direct emotion prediction from the con-087
+versational text and derives an emotion prior from088
+the appraisal state. Finally, a voting mechanism089
+combines these signals to produce the final emotion090
+prediction. This design integrates textual, appraisal-091
+based, and psychologically grounded evidence in092
+a selective and interpretable manner. In summary,093
+this paper makes three main contributions:094
+• It introduces CARE, a psychology-guided095
+multi-agent framework that uses cognitive ap-096
+praisal as a gating signal, deciding which rea-097
+soning perspectives should be used. It allows098
+our method to reduce unnecessary reasoning.099
+• It designs a set of LLM agents for appraisal100
+extraction and complementary psychological101
+reasoning. This design separates different rea-102
+soning roles, provides explicit intermediate103
+evidence, and allows the framework to be ex-104
+tended with additional psychological theories.105
+• It provides an extensive zero-shot evaluation106
+on MELD and IEMOCAP using multiple107
+LLMs. The results and ablation studies show108
+that appraisal-guided gating improves ERC109
+performance while activating fewer reasoning110
+agents and reducing inference cost.111
+2 Related Work112
+Emotion Recognition in Conversations The113
+wide range methods of ERC use conversational114
+context, speaker interactions, and external knowl-115
+edge (Majumder et al., 2019; Ghosal et al., 2020)116
+or LLMs fine-tuning (Lei et al., 2024; Liu et al., 117
+2024; Zhang et al., 2025; Fu et al., 2025). Re- 118
+cently, agent-based methods further decompose 119
+emotion reasoning into specialized roles that an- 120
+alyze personality, cognitive distortions, and mul- 121
+timodal evidence (Mozikov et al., 2024; Nguyen 122
+et al., 2026). For multimodal ERC, existing meth- 123
+ods integrated textual, acoustic and visual signals 124
+using recurrent, graph-based, or Transformer archi- 125
+tectures (Ma et al., 2023; Huang et al., 2024; Ai 126
+et al., 2025; Wu et al., 2025a; Lyu et al., 2026). 127
+Psychological Modeling for ERC Psychology- 128
+grounded methods explain emotions through cog- 129
+nitive and dispositional factors that are not di- 130
+rectly observable from conversational utterances. 131
+Appraisal-based studies modeled emotions through 132
+evaluations of events (Troiano et al., 2023; Yeo and 133
+Jaidka, 2025). CBT-inspired approaches used DoT 134
+to separate objective facts from subjective inter- 135
+pretations and identify cognitive distortions (Chen 136
+et al., 2023; Hotta et al., 2025). Personality-based 137
+methods capture stable or situation-dependent 138
+speaker characteristics (Wang et al., 2024), while 139
+recent multi-agent frameworks combine personal- 140
+ity, cognitive distortions, and multimodal evidence 141
+for emotion prediction (Nguyen et al., 2026). How- 142
+ever, they applied a fixed set of psychological and 143
+multimodal reasoning sources without determining 144
+which perspective is relevant to each utterance. 145
+We focus on reconstruction of the appraisal pro- 146
+cess that uses a gating method for information dis- 147
+tillation from appraisal extraction for each utter- 148
+ance. Combined with an appraisal predictor and 149
+weighted voting, CARE makes significant differ- 150
+ences compared to InsideOut (Mozikov et al., 2024) 151
+and CMTD (Nguyen et al., 2026). 152
+2
+
+PAGE 3
+3 The CARE Framework153
+3.1 Problem Statement154
+Let D = ⟨z1, . . . ,zN ⟩ denote a conversation of155
+N utterances. Each utterance is represented as156
+zi = (ui, si, vi, ai) where ui is the textual ut-157
+terance spoken by the speaker si, and vi and158
+ai denote the facial expression and acoustic fea-159
+tures of the speaker. For a target utterance ut,160
+we define its preceding textual context as Ct =161
+⟨(u1, s1), . . . ,(ut−1, st−1)⟩. Given a predefined162
+emotion label set Y, CARE predicts:163
+ˆyt = FCARE(Ct, ut, st, vt, at) ∈ Y (1)164
+3.2 Framework Overview165
+Figure 1 introduces CARE. It includes: a text agent166
+(Section 3.3), an appraisal extraction agent (Section167
+3.4), appraisal gating (Section 3.5), an appraisal168
+predictor (Section 3.6), an inference agent (Section169
+3.7), and an evidence voting agent (Section 3.8).170
+3.3 Text Agent171
+The Text Agent produces an emotion and its con-172
+fidence score
+
+˜y(T )t , c(T )t  = T (Ct, ut, st, Y),173
+where ˜y(T )t ∈ Y is its predicted emotion and174
+c(T )t ∈ [0, 1] is its confidence score used by the175
+voting. It is done in a shallow level using a prompt.176
+3.4 Cognitive Appraisal Extraction Agent177
+Cognitive appraisal theory shows that emotion de-178
+pends not only on an event, but on how a person179
+evaluates its significance for their goals, expecta-180
+tions, and social concerns (Lazarus, 1991; Smith181
+and Ellsworth, 1985; Scherer, 2001; Ellsworth and182
+Scherer, 2003). CARE represents this intermediate183
+process by estimating how the speaker appraises184
+the situation underlying each target utterance.185
+apt = A(Ct, ut, st), (2)186
+where A is the Cognitive Appraisal Extraction187
+Agent and apt contains eight fields (A.1). Goal rel-188
+evance and goal congruence capture the situation’s189
+motivational significance; agency, certainty, and190
+novelty describe its perceived cause and predictabil-191
+ity (Scherer and Moors, 2019); moral violation and192
+social threat capture its normative and relational193
+meaning (Ellsworth and Scherer, 2003); and affect194
+intensity records the strength of the implied re-195
+sponse without assigning an emotion label (Russell196
+and Barrett, 1999). The extracted appraisal state197
+serves two roles. The Appraisal Predictor maps 198
+it to an appraisal-conditioned emotion prediction, 199
+and Deterministic Appraisal Gating uses it to select 200
+appropriate indicators to the target utterance. 201
+3.5 Deterministic Appraisal Gating 202
+Appraisal captures how the speaker evaluates a 203
+situation, but it does not fully explain why that 204
+evaluation arises. Instead of using all extracted 205
+appraisal information that may introduce noise, 206
+CARE projects appraisal information into four psy- 207
+chological and two multimodal reasoning gates 208
+(agents) as complementary projection evidence. 209
+Let Rt denote at least medium goal relevance; 210
+Bt: blocked or mixed goal congruence; and Ut: 211
+low certainty. Let It, Nt, St, and Mt denote at least 212
+medium affect intensity, novelty, social threat, and 213
+moral violation, respectively. Jt denotes agency as- 214
+signed to the self, another person, or both, whereas 215
+Ot restricts agency to another person or shared 216
+agency. Finally, EVt and EAt indicate the avail- 217
+ability of visual and acoustic evidence, and Ht 218
+indicates that the target speaker has at least four 219
+preceding turns. With Qt = It ∨ Ut ∨ Nt ∨ St, the 220
+six activation rules are as follows. 221
+DoT gate Cognitive appraisal theory shows that 222
+people first determine whether a situation is rel- 223
+evant to their goals before evaluating its conse- 224
+quences (Aue et al., 2007). Following Chen et al. 225
+(2023), the DoT (Diagnosis-of-Thought) gate sep- 226
+arates observable facts from subjective thoughts, 227
+contrasts evidence for and against those thoughts, 228
+and identifies underlying beliefs or expectations 229
+(Beck, 2020). The DoT gate is activated only when 230
+the situation is goal-relevant and at least one of 231
+these cues is presented (detail is shown in A.10). 232
+gDoTt = Rt ∧ (Bt ∨ Ut ∨ It) (3) 233
+Distortion gate This gate determines whether 234
+the interpretation exhibits a recognized cognitive 235
+distortion (defined in A.2) that corresponds to dy- 236
+namic states of emotions (Nguyen et al., 2026). 237
+The gate is considered only when DoT is active. 238
+gDistt = gDoTt ∧ (Ut ∨ Jt ∨ St ∨ Mt) (4) 239
+Social gate captures relational and normative 240
+meaning (blame, rejection, face threat, and norm vi- 241
+olation), which can be relevant to emotions (Fiske 242
+et al., 2002; Hareli and Parkinson, 2008; Russell 243
+and Giner-Sorolla, 2011). The rule activates the 244
+3
+
+PAGE 4
+gate to examine these relational and normative im-245
+plications; it does not presume that blame, rejec-246
+tion, or norm violation has actually occurred.247
+gSocialt = St ∨ Mt ∨ (Ot ∧ Bt) (5)248
+Trait gate Traits have been used to improve the249
+performance of ERC (Shen et al., 2025; Nguyen250
+et al., 2026). It captures relatively stable speaker251
+traits based on on repeated observations rather than252
+one utterance (Roberts and DelVecchio, 2000; Wat-253
+son and Clark, 1992; Fleeson, 2001, 2007). Thus,254
+Ht enables cross-turn comparison, while It serves255
+as a salience filter. Social threat or blocked/mixed256
+goal congruence, St ∨ Bt, provides a trait-relevant257
+context in which individual differences may be-258
+come expressed (Tett and Guterman, 2000).259
+gTraitt = Ht ∧ It ∧ (St ∨ Bt) (6)260
+Visual gate provides complementary facial ev-261
+idence related to emotions (Adams and Kleck,262
+2003). When visual evidence is available and Qt263
+indicates that nonverbal evidence may clarify a264
+salient, uncertain, novel, or socially significant ap-265
+praisal, CARE extracts a representative facial frame266
+aligned with the utterance to capture the speaker’s267
+stable expression EVt (Ekman and Friesen, 1978;268
+Adams and Kleck, 2003) (Appendix A.3).269
+gVisualt = EVt ∧ Qt (7)270
+Acoustic gate Acoustic signals provide strong271
+indicators for emotion recognition (Banse and272
+Scherer, 1996). To obtain it, a structured prompt273
+guides the multimodal LLM to extract EAt that de-274
+scribes tone, pitch, speaking rate, loudness, and275
+energy (Banse and Scherer, 1996; Schuller et al.,276
+2018; Poria et al., 2017; Busso et al., 2008) (A.4).277
+Qt identifies affectively salient or ambiguous ap-278
+praisals for which prosody can provide additional279
+evidence (Scherer, 2003), the gate is:280
+gAcoustict = EAt ∧ Qt (8)281
+3.6 Appraisal Predictor282
+The Predictor maps the cognitive appraisal state283
+extracted for ut to an emotion-space prediction. It284
+provides CARE with prior knowledge of the utter-285
+ance ut to Y that complements the zero-shot LLM286
+agents. The predictor is trained by a lightweight287
+predictor xt = ϕ(apt) ∈ R16, where ϕ maps ordi-288
+nal appraisal dimensions to normalized scalar fea-289
+tures, represents goal congruence and agency using290
+reduced and standard one-hot encodings (Appendix 291
+A.5). The predictor achieves weighted F1 scores 292
+of 56.63 on MELD and 46.06 on IEMOCAP. 293
+The Appraisal Predictor returns its highest- 294
+scoring emotion and the corresponding score 295
+ρ(P )t = maxy∈Y p(P )t (y) used for voting. 296
+3.7 Reasoning and Emotion Inference 297
+Let K denote the complete set of reasoning agents. 298
+For the target utterance ut, the subset activated by 299
+the appraisal gates is Kt =
+n
+k ∈ K |g(k)t = 1o. 300
+Once Kt is determined, each activated reasoning 301
+agent k ∈ Kt is invoked through a separate zero- 302
+shot LLM call and returns reasoning evidence r(k)t . 303
+A shared Emotion Inference Agent indepen- 304
+dently converts each reasoning output into a source- 305
+specific emotion prediction and confidence score. 306
+
+˜y(k)t , c(k)t  = E r(k)t , Y , k ∈ Kt, (9) 307
+where ˜y(k)t ∈ Yis the emotion inferred from the 308
+source agent k, and c(k)t ∈ [0, 1] is its confidence 309
+score. A score of c(k)t = 0represents abstention. 310
+The same Emotion Inference Agent is applied 311
+separately to every r(k)t ; reasoning outputs from 312
+different agents are not combined before emotion 313
+inference. Therefore, |Kt| activated agents produce 314
+|Kt| source-specific predictions. 315
+3.8 Weighted Evidence Voting 316
+CARE aggregates three types of prediction sources: 317
+the Text Agent, the Appraisal Predictor, and the 318
+activated reasoning agents. 319
+Let St = {T, P} ∪ Kt denote the prediction 320
+sources, where T and P refer to the Text Agent and 321
+Appraisal Predictor, and Kt is the set of activated 322
+reasoning agents. We define the instance-specific 323
+confidence score of source s ∈ St as: 324
+c(s)t =
+
+
+
+c(T )t , s = T,
+ρ(P )t , s = P,
+c(k)t , s = k ∈ Kt.
+(10) 325
+Each source s is assigned a predefined spe- 326
+cific weight ωs, which remains fixed across ut- 327
+terances and controls its overall contribution (Ap- 328
+pendix A.7). The score assigned to emotion y ∈ Y 329
+is Vt(y) = Ps∈St ωsc(s)t I h˜y(s)t = yi. The final 330
+prediction is defined as follows. 331
+ˆyt = arg maxy∈Y Vt(y) (11) 332
+4
+
+PAGE 5
+When no reasoning agent is activated, St =333
+{T, P}. If Vt(y) = 0 for every y ∈ Y, CARE334
+returns the Text Agent prediction. Detailed opera-335
+tion of CARE is shown in Algorithm 1.336
+4 Experimental Settings337
+4.1 Datasets338
+We evaluate our method on two multimodal339
+datasets. MELD (Poria et al., 2019a) contains340
+TV-series conversations with utterance-level emo-341
+tion and sentiment labels across text, audio, and342
+visual modalities. IEMOCAP (Busso et al., 2008)343
+consists of actor dyadic dialogues labeled with six344
+emotions and organized into five sessions; Session345
+5 is used for testing. Table 1 shows its statistics.346
+Table 1: Statistics of MELD and IEMOCAP datasets.
+Dataset #Convs #Utters #Classes GenreTrain Test Train Test
+MELD 1153 280 11098 2610 7 TV Sitcom
+IEMOCAP 120 31 5810 1623 6 Dialogue
+4.2 LLM Backbones347
+CARE employs strong LLMs: GPT family (4o-348
+mini, 4.1-nano, 4.1-mini, 4.1, o4-mini, gpt-5, 5-349
+nano, and 5-mini), Qwen2.5-7B (Qwen et al.,350
+2025), and Mistral-7B (Jiang et al., 2023).351
+5 Results and Discussion352
+5.1 Improvement over Base LLMs353
+Baselines Text-only is the Text Agent in Figure354
+1. InsideOut (Mozikov et al., 2024) designs five355
+shallow agents for ERC. AER-LLM (Hong et al.,356
+2025) uses textualized eGeMAPS features to es-357
+timate an emotion distribution. SpeechCueLLM358
+(Wu et al., 2025b) converts acoustic features into359
+natural-language descriptions and incorporates360
+them into a prompt. CoT is a single-agent base-361
+line that uses CoT technique. CMTD (Nguyen362
+et al., 2026) is the latest multi-agent framework363
+that combines distortions and traits for MERC.364
+Results Table 2 shows that CARE achieves sig-365
+nificant improvements over strong baselines. The366
+improvement comes from three aspects. First,367
+CARE is a selective framework based on appraisal368
+gating. It provides a way that the model can select369
+appropriate multimodal indicators for each utter-370
+ance that helps to reduce noise and inference cost371
+(Table 10). Second, it combines psychological with372
+multimodal (textual, visual and acoustic) indica- 373
+tors for emotional reasoning. Psychological indica- 374
+tors provide deeper evidence of emotions using ap- 375
+praisal projection. Combined with shallow features 376
+extracted from text, vision, and speech, CARE can 377
+predict emotions based on selective evidence. Ta- 378
+ble 4 shows the contribution of each component. 379
+Finally, voting also offers soft alignment among 380
+predictors that helps to avoid over-prediction of a 381
+single predictor (output observation is in A.8). 382
+CMTD is the second best model because it is a 383
+multi-agent framework that combines distortion 384
+and trait detection. The combination provides 385
+deeper understanding of latent patterns formed an 386
+emotion. However, CMTD is still behind CARE 387
+with quite large gaps, thanks to the gating mech- 388
+anism. CoT obtains quite competitive scores be- 389
+cause it can simulate the reasoning process based 390
+on prompting. Other methods produce quite low 391
+results. A possible reason is that they only use 392
+shallow information for emotion prediction. 393
+5.2 Comparative Reference to SOTA Methods 394
+We made a reference by comparing CARE to SOTA 395
+fine-tuned methods. We did not claim that CARE 396
+achieve the best results over SOTA fine-tuned meth- 397
+ods due to different settings.AdaIGN models intra- 398
+speaker and inter-speaker context dependencies us- 399
+ing an adaptive interaction graph network (Tu et al., 400
+2024). DE-GCN captures dialogue and event rela- 401
+tions for MERC by a graph neural network (GNN) 402
+(Ai et al., 2024). GS-MCC uses a graph-spectrum- 403
+based collaborative learning framework (Ai et al., 404
+2025). CSS combines Synergistic Polynomial Fu- 405
+sion and Pareto Gradient Modulator to create a 406
+couple representation (Lyu et al., 2026). 407
+Table 3 shows that there exit gaps between 408
+CARE and SOTA methods. For MELD, the per- 409
+formance of CARE is behind GS-MCC by around 410
+3.0% because GS-MCC is a complex GNN model 411
+using Fourier graph operators and is fine-tuned 412
+on MELD and IEMOCAP. On IEMOCAP the 413
+strongest fine-tuned method is CSS, which is about 414
+5.2% above CARE. On the other hand, our CARE 415
+performs in the zero-shot setting, which is practical 416
+in actual applications. Because CARE needs no 417
+annotated training data, it adapts easily to new do- 418
+mains, such as medical or psychological treatment, 419
+where high-quality labels are scarce. Interestingly, 420
+CARE produces better scores than two fine-tuned 421
+methods: AdaIGN and DE-GCN. It confirms the 422
+efficiency of our design based on appraisal gating. 423
+5
+
+PAGE 6
+Table 2: Results on MELD and IEMOCAP. ACC and F1 denote accuracy and weighted F1, respectively. The best
+scores are shown in bold with p-value ≤ 0.05. Text-only uses a single agent, while the other methods use structured
+or multi-agent reasoning (Tu et al., 2024; Ai et al., 2024; Mozikov et al., 2024; Ai et al., 2025; Nguyen et al., 2026).
+Base Model Text-only InsideOut AER-LLM SpeechCueLLM CoT CMTD CARE
+ACC F1 ACC F1 ACC F1 ACC F1 ACC F1 ACC F1 ACC F1
+MELD
+gpt-4o-mini 46.30 39.71 38.47 39.71 37.33 36.27 58.62 59.83 54.98 55.66 60.28 58.95 67.78 65.70
+gpt-4.1-nano 42.45 39.34 33.80 32.91 35.08 35.46 41.88 40.87 54.86 55.29 56.19 54.43 64.33 64.18
+gpt-4.1-mini 54.56 57.45 42.91 43.14 51.95 52.91 52.87 54.19 59.51 60.05 59.78 60.05 62.33 63.52
+gpt-4.1 51.61 54.89 46.22 46.71 57.56 59.47 52.87 54.19 63.80 62.94 64.15 63.53 63.98 64.46
+o4-mini 59.58 60.87 55.48 55.81 59.08 60.00 53.79 55.23 61.54 62.27 64.23 64.17 70.92 70.52
+gpt-5-nano 59.96 60.62 55.97 56.87 56.43 57.15 52.52 53.93 58.01 56.87 60.89 58.29 63.10 63.51
+gpt-5-mini 55.47 57.58 53.75 55.81 55.05 56.10 45.13 45.56 57.02 58.04 60.18 61.01 67.74 68.68
+gpt-5 57.37 59.69 56.56 58.74 56.59 58.34 54.48 56.18 59.03 60.06 60.80 61.89 66.55 67.75
+Qwen2.5-7B 39.16 39.48 31.48 31.59 53.79 55.25 56.93 57.89 57.17 56.44 54.13 49.85 62.34 62.17
+Mistral-7B 44.15 40.67 40.29 36.30 48.06 49.41 32.11 26.24 53.18 54.04 52.46 48.17 66.67 63.24
+Average 47.77 45.50 38.39 38.59 51.09 52.04 50.12 50.41 57.91 58.17 59.31 58.03 65.57 65.37
+IEMOCAP
+gpt-4o-mini 51.39 49.36 46.70 42.58 51.06 50.50 54.26 51.80 56.18 54.96 58.21 56.29 63.03 60.13
+gpt-4.1-nano 42.00 40.92 48.40 46.05 40.51 39.62 49.89 46.02 50.10 49.33 50.38 51.82 54.80 52.71
+gpt-4.1-mini 49.47 47.60 47.87 46.47 56.60 55.73 53.83 50.42 56.08 54.11 52.22 52.15 67.94 65.74
+gpt-4.1 50.75 49.15 47.97 47.36 56.92 56.19 50.85 47.54 60.70 59.48 63.33 63.02 70.25 69.19
+o4-mini 47.97 46.49 48.61 46.95 56.82 55.15 55.33 53.19 56.14 53.98 59.91 59.98 62.05 60.10
+gpt-5-nano 52.77 51.53 45.07 44.14 52.13 50.95 50.10 48.74 50.49 48.37 57.36 55.96 59.70 57.98
+gpt-5-mini 62.69 62.70 45.41 45.00 58.10 57.19 54.69 53.17 57.14 56.54 65.86 64.29 67.48 66.34
+gpt-5 61.09 61.23 61.75 61.49 58.95 58.81 52.34 49.82 58.63 58.00 63.01 62.21 69.93 68.45
+Qwen2.5-7B 47.87 45.68 41.79 36.86 46.70 50.05 50.75 47.49 50.37 48.30 48.39 47.73 59.06 55.20
+Mistral-7B 45.10 42.91 39.97 34.96 46.16 45.64 45.10 42.86 49.84 48.08 49.46 49.86 60.02 53.75
+Average 51.11 49.76 47.35 45.19 52.40 51.98 51.71 49.11 54.57 53.12 56.81 56.33 63.43 60.96
+Table 3: Comparison with SOTA methods Ai et al.
+(2025); Lyu et al. (2026). CARE uses the best models
+(gpt-o4-mini on MELD and GPT-4.1 on IEMOCAP).
+Method MELD IEMOCAP
+AdaIGN (Tu et al., 2024) 70.70 66.80
+DE-GCN (Ai et al., 2024) 68.80 65.50
+GS-MCC (Ai et al., 2025) 73.90 69.00
+CSS (Lyu et al., 2026) 68.47 75.42
+CARE 70.92 70.25
+6 Ablation study424
+6.1 Component-wise Observation425
+Scores in Table 4 show that all components benefit426
+the performance of the framework. The Appraisal427
+Predictor (P) provides prior knowledge of the cur-428
+rent utterance to the label set Y. When using all429
+six gates (without routing), the performance still430
+improves. It shows that CARE can combine in-431
+formation from different agents to produce more432
+correct predictions. When adding the gating agent,433
+CARE can select more appropriate indicators that434
+improve the quality of prediction. Detailed obser-435
+vation of activated gates is shown in Figure 2.436
+Table 4: Contribution of CARE components on MELD
+(gpt-o4-mini) and IEMOCAP (gpt-4.1). T : the Text
+Agent, P : the Appraisal Predictor, A: all six gating
+agents, and G: the Appraisal-Gated Routing Agent.
+Without G, all six reasoning agents are invoked.
+Component configuration
+Group Entry T T+P T+P+A CARE
+Components
+T ✓ ✓ ✓ ✓
+P ✓ ✓ ✓
+A ✓ ✓
+G ✓
+MELD ACC 59.58 61.53 68.35 70.92F1 60.87 62.39 68.11 70.52
+IEMOCAP ACC 50.75 59.60 65.78 70.25F1 49.15 58.06 63.07 69.19
+6.2 Gate Intervention Analysis 437
+Activation rates We computed the activation rate 438
+of each gate over the total testing samples of MELD 439
+and IEMOCAP. Figure 2 shows that the DoT, dis- 440
+tortion, visual, and acoustic gates are activated at 441
+high rates. It is understandable that visual and 442
+6
+
+PAGE 7
+acoustic gates provide important indicators from443
+speakers. For DoT and distortion detection, these444
+two gates provide dynamic states of emotions in445
+a conversation that can be combined with other446
+multimodal features. For personal trait and social447
+gates, it is challenging to align a trait and social as-448
+pects formed in a long time with dynamic states of449
+emotions formed in a short time in a conversation.450
+DoT
+Distortion
+Social
+Visual
+Speech
+Trait
+20
+40
+60
+MELD
+IEMOCAP
+Figure 2: Activation rates (%) of CARE’s appraisal-
+guided gates on MELD and IEMOCAP.
+Leave-One-Out (LOO) test Table 5 shows that451
+Visual has the strongest standalone contribution,452
+whereas Trait is mainly valuable through interac-453
+tions with other agents. Distortion contributes con-454
+sistently in both settings, while Speech provides455
+moderate gains and Social and DoT have smaller456
+effects. It aligns the activation rates in Figure 2457
+Table 5: Agent-wise contribution without appraisal-
+gated routing, evaluated on the IEMOCAP dataset using
+GPT-5-nano. Leave-One-Out (LOO): performance af-
+ter removing an agent from CARE; standalone gain:
+the improvement by adding only that agent to the non-
+reasoning baseline. Values are percentage points.
+Reasoning agent LOO Standalone gain
+∆ACC ∆F1 ∆ACC ∆F1
+DoT -0.64 -1.38 +0.56 +0.34
+Distortion -4.16 -3.99 +5.78 +4.43
+Social +0.11 -0.86 +3.34 +2.36
+Visual -4.91 -3.57 +6.31 +6.2
+Speech -2.98 -2.47 +3.76 +2.32
+Trait -4.26 -4.50 +0.24 -0.09
+Gate selection Table 6 shows that CARE con-458
+sistently slightly higher all routing methods across459
+both datasets. Although activating all six agents460
+improves accuracy over random gating, its lower 461
+F1 indicates that inappropriate activation can in- 462
+troduce redundant or conflicting evidence. More 463
+importantly, CARE surpasses RnA, which uses the 464
+same number of selected gates. This confirms that 465
+CARE’s effectiveness stems from its psychologi- 466
+cally grounded selection of relevant agents rather 467
+than merely reducing the number of agent calls. 468
+Table 6: Comparison of routing strategies using gpt-5-
+nano on MELD and gpt-4o-mini on IEMOCAP. RA:
+random gating; AA: all six agents, and RnA: randomly
+selects the same number of agents activated by CARE.
+Dataset Metric RA AA RnA CARE
+MELD ACC 58.32 61.91 62.35 63.10F1 57.74 57.53 62.18 63.51
+IEMOCAP ACC 56.00 57.90 59.48 63.03F1 53.05 52.37 56.65 60.13
+6.3 Psychological Grounding Validation 469
+We evaluated cognitive and social appraisal repre- 470
+sentations using theoretical consistency (TC) (Chen 471
+et al., 2023), inter-rater reliability (IRR) (Hof- 472
+mann et al., 2020), and clinical actionability (CA), 473
+adapted from RAGAS (Es et al., 2024). 474
+Table 7: Human and LLM evaluations of cognitive ap-
+praisal (CA) and social appraisal (SA). Three people
+rated 100 samples (A.9) and LM Judge performs all.
+Dataset Theory Human LM JudgeTC IRR CA TC IRR CA
+MELD CA 4.08 0.73 4.10 4.40 0.84 4.41SA 4.04 0.72 3.77 4.41 0.82 4.39
+IEMOCAP CA 4.03 0.72 4.21 3.93 0.84 3.50SA 4.01 0.71 4.11 3.92 0.81 3.48
+Appraisal extraction Table 7 indicate that the 475
+extracted cognitive appraisals are theoretically 476
+grounded, consistently interpreted by evaluators, 477
+and sufficiently informative for downstream psy- 478
+chological analysis. The agreement between hu- 479
+man and LM-based assessments further suggests 480
+that the representations capture stable appraisal pat- 481
+terns rather than evaluator-specific judgments. 482
+Distortion detection We investigated the psycho- 483
+logical grounding of the distortion detection gate. 484
+Due to no distortion labels, we created reference 485
+labels using domain experts and an LLM ensemble 486
+(automatic). For LLM annotation, we created dis- 487
+tortion labels by majority voting of GPT-4o-mini, 488
+GPT-5-mini, and Gemini-2.5-Flash for diversity. 489
+7
+
+PAGE 8
+We then applied GPT-5 (the backbone under test)490
+to predict distortions to calculate the F1-score.491
+For humans, three experts with training in492
+clinical/counseling psychology and CBT indepen-493
+dently annotated each target utterance using the494
+11-category distortion codebook (Appendix A.2,495
+supported by written definitions and canonical ex-496
+amples; “no distortion” was an explicit option to497
+avoid forced over-labeling. Due to the cost, we498
+divided MELD into three parts, each was annotated499
+by one expert. After annotation, we selected five500
+conversations of an expert and asked two others for501
+additional annotation to calculate agreement. Over502
+2610 utterances, 1620 utterances have distortions.503
+The annotation costed 250 USD in one week.504
+Table 8: Distortion detection on MELD. Fleiss’ κ is
+inter-annotator agreement among the three experts.
+LLM label Human label Fleiss’ Kappa
+0.65 0.76 0.77
+The Fleiss’ κ values in Table 8 indicate sub-505
+stantial agreement among experts, establishing a506
+reliable human anchor and an upper reference for507
+how well any predictor can match it.508
+Trait detection We evaluated personality trait509
+prediction using mean absolute error (MAE) (Will-510
+mott and Matsuura, 2005), Pearson’s r (Schober511
+et al., 2018), and the concordance correlation coef-512
+ficient (CCC) (Lawrence, 1989).513
+Table 9: Personality trait prediction by GPT-4o-mini on
+100 MELD samples with expert-annotated gold labels.
+Trait MAE ↓ Pearson r ↑ CCC ↑
+Openness 0.408 0.512 0.480
+Conscientiousness 0.394 0.772 0.754
+Extraversion 0.386 0.576 0.536
+Agreeableness 0.488 0.516 0.500
+Neuroticism 0.451 0.794 0.707
+As shown in Table 9, Conscientiousness is pre-514
+dicted most consistently, while Neuroticism shows515
+strong correlation but weaker calibration. Extraver-516
+sion has low absolute error but limited discrimina-517
+tion, whereas Agreeableness remains the most chal-518
+lenging. High Pearson scores show the alignment519
+between LLMs prediction and human annotation.520
+Social extraction As shown in Table 7, social521
+appraisal achieves consistently strong theoretical522
+consistency and inter-rater reliability with both523
+human and LM-judge evaluations, indicating that524
+the extracted representations are theoretically well 525
+aligned and interpreted consistently across eval- 526
+uators. Clinical actionability also remains high 527
+overall, although human evaluators rate it slightly 528
+lower than that of cognitive appraisal. 529
+6.4 Latency and Cost 530
+Table 10 shows that CARE is the most efficient 531
+method compared to InsideOut and CMTD. For 532
+running time, CARE is 2-3 times slower than the 533
+Text-only method, in which CARE requires around 534
+6 seconds per utterance, but still much faster than 535
+InsideOut and CMTD. This is because CARE can 536
+select appropriate agents for each utterance. It 537
+does not use all agents in a sequence manner. In 538
+contrast, CMTD and InsideOut apply all agents for 539
+each utterance that increase inference time. For 540
+cost, CARE is also cost-effective due to the gating 541
+mechanism, which is beneficial for actual cases. 542
+Table 10: Running time and cost on MELD. Ratio is the
+runtime computed over the Text-only baseline. Lower
+is better. Ratio and cost are reported per utterance.
+gpt-4o-mini gpt-5-mini gpt-4.1
+Method Ratio Cost ($) Ratio Cost ($) Ratio Cost ($)
+Text-only – 0.005 – 0.011 – 0.067
+InsideOut 9.403 0.053 7.469 0.119 10.111 0.899
+CMTD 17.702 0.098 6.618 0.255 26.755 1.641
+CARE 2.954 0.032 1.856 0.200 2.997 0.427
+7 Conclusion 543
+We introduced CARE, a cognitive appraisal-gated 544
+multi-agent framework for multimodal emotion 545
+recognition in conversations (MERC). CARE uses 546
+appraisal both as emotion evidence and as a control 547
+signal to selectively activate relevant psychological 548
+and multimodal reasoning agents. Experiments on 549
+MELD and IEMOCAP show consistent improve- 550
+ments over strong MERC baselines across diverse 551
+LLM backbones. Ablation and routing analyses 552
+further demonstrate that these gains arise from se- 553
+lecting relevant evidence rather than indiscrimi- 554
+nately activating more agents, while also reducing 555
+unnecessary computation. These findings highlight 556
+cognitive appraisal as an effective mechanism for 557
+building more accurate, efficient, and interpretable 558
+emotion-aware conversational systems. CARE of- 559
+fers a flexible way to integrate psychological indi- 560
+cators into MERC frameworks. Future work will 561
+investigate other psychological indicators and align- 562
+ment methods for text, image, and speech. 563
+8
+
+PAGE 9
+Limitations564
+Despite its promising results, the framework has565
+several limitations. First, all experiments were con-566
+ducted on MELD and IEMOCAP, both of which are567
+acted datasets derived from television sitcoms and568
+scripted dialogues. Because acted emotional ex-569
+pressions may differ from those occurring in spon-570
+taneous, real-world conversations, the framework571
+should be further evaluated on more diverse and572
+naturalistic conversational datasets. Second, the573
+framework adopts a middle-frame strategy, extract-574
+ing a single representative image to capture the575
+speaker’s visual cues. We acknowledge that this576
+approach is computationally efficient and helps re-577
+duce latency; however, relying on one static frame578
+may overlook temporal facial dynamics and micro-579
+expressions that are important for identifying short-580
+lived emotions such as disgust and surprise. Future581
+work should investigate video-based processing582
+methods that can process both visual and acoustic583
+features while carefully balancing recognition per-584
+formance against computational cost and latency.585
+In addition, the framework should also investigate586
+physical cues from the human body, such as pos-587
+ture, gestures, head movements, and body dynam-588
+ics. These features can provide complementary589
+information to facial, acoustic, and textual signals,590
+particularly when facial expressions are ambiguous591
+or partially obscured, and may therefore improve592
+emotion recognition in natural conversational set-593
+tings. Finally, some parts of psychological ground-594
+ing in Section 6.3 use small-scale human evalua-595
+tion. We acknowledge this setting (combined with596
+LM judge) due to high cost of human annotation;597
+however, actual applications may require a larger598
+evaluation scale to assess psychological indicators.599
+Ethics Statement600
+The authors confirm that this study raises no ethi-601
+cal concerns. We state that the distortion detection602
+component and the overall framework are not in-603
+tended to replace clinical screening, diagnosis, or604
+mental healthcare treatment. Distortion detection is605
+used solely as an intermediate step in the emotional606
+reasoning process, and the framework may occa-607
+sionally produce incorrect distortion predictions.608
+However, these predictions are employed only for609
+emotion recognition within a computational lin-610
+guistics setting. Any use of distortion detection in611
+real-world medical or mental health applications612
+should therefore be reviewed and validated by qual-613
+ified psychologists or healthcare professionals. Hu- 614
+man evaluation did not use any personal informa- 615
+tion of annotators for our experiments. Instead, we 616
+only use humans to annotate samples with clear 617
+guideline. We also acknowledge the authors of In- 618
+siteOut and DoT for sharing their prompts, which 619
+enabled us to reproduce and evaluate these meth- 620
+ods. The corresponding code and datasets were 621
+obtained from publicly available GitHub reposito- 622
+ries linked in the original papers. To ensure a fair 623
+comparison, we did not perform method-specific 624
+parameter tuning during the experiments. 625
+References 626
+Reginald Adams and Robert Kleck. 2003. Perceived 627
+gaze direction and the processing of facial displays 628
+of emotion. Psychological science, 14:644–7. 629
+Wei Ai, Yuntao Shou, Tao Meng, and Keqin Li. 2024. 630
+Der-gcn: Dialog and event relation-aware graph con- 631
+volutional neural network for multimodal dialog emo- 632
+tion recognition. IEEE Transactions on Neural Net- 633
+works and Learning Systems, 36(3):4908–4921. 634
+Wei Ai, Fuchen Zhang, Yuntao Shou, Tao Meng, 635
+Haowen Chen, and Keqin Li. 2025. Revisiting multi- 636
+modal emotion recognition in conversation from the 637
+perspective of graph spectrum. In Proceedings of 638
+the AAAI Conference on Artificial Intelligence, vol- 639
+ume 39, pages 11418–11426. 640
+Tatjana Aue, Anders Flykt, and Klaus Scherer. 2007. 641
+First evidence for differential and sequential effer- 642
+ent effects of goal relevance and goal conduciveness 643
+appraisal. Biological psychology, 74:347–57. 644
+Rainer Banse and Klaus Scherer. 1996. Acoustic pro- 645
+files in vocal emotion expression. Journal of Person- 646
+ality and Social Psychology, 70:614–636. 647
+Judith S Beck. 2020. Cognitive behavior therapy: Ba- 648
+sics and beyond. Guilford Publications. 649
+Carlos Busso, Murtaza Bulut, Chi-Chun Lee, Abe 650
+Kazemzadeh, Emily Mower, Samuel Kim, Jean- 651
+nette N Chang, Sungbok Lee, and Shrikanth S 652
+Narayanan. 2008. Iemocap: Interactive emotional 653
+dyadic motion capture database. Language resources 654
+and evaluation, 42:335–359. 655
+Zhiyu Chen, Yujie Lu, and William Wang. 2023. Em- 656
+powering psychotherapy with large language models: 657
+Cognitive distortion detection through diagnosis of 658
+thought prompting. In Findings of the Association 659
+for Computational Linguistics: EMNLP 2023, pages 660
+4295–4304. 661
+Derek Edwards. 1999. Emotion discourse. Culture & 662
+Psychology, 5:271 – 291. 663
+9
+
+PAGE 10
+Paul Ekman and Wallace V . Friesen. 1978.Facial Ac-664
+tion Coding System: A Technique for the Measure-665
+ment of Facial Movement. Consulting Psychologists666
+Press, Palo Alto, CA.667
+Phoebe C Ellsworth and Klaus R Scherer. 2003. Ap-668
+praisal processes in emotion.669
+Shahul Es, Jithin James, Luis Espinosa Anke, and670
+Steven Schockaert. 2024. RAGAs: Automated evalu-671
+ation of retrieval augmented generation. In Proceed-672
+ings of the 18th Conference of the European Chap-673
+ter of the Association for Computational Linguistics:674
+System Demonstrations, pages 150–158, St. Julians,675
+Malta. Association for Computational Linguistics.676
+Susan Fiske, Amy Cuddy, Peter Glick, and Jun Xu. 2002.677
+A model of (often mixed) stereotype content: Compe-678
+tence and warmth respectively follow from perceived679
+status and competition. Journal of personality and680
+social psychology, 82:878–902.681
+William Fleeson. 2001. Toward a structure- and process-682
+integrated view of personality: Traits as density dis-683
+tributions of states. Journal of Personality and Social684
+Psychology, 80:1011–1027.685
+William Fleeson. 2007. Situation-based contingencies686
+underlying trait-content manifestation in behavior.687
+Journal of Personality, 75:825–862.688
+Yumeng Fu, Junjie Wu, Zhongjie Wang, Meishan689
+Zhang, Lili Shan, Yulin Wu, and Bingquan Liu. 2025.690
+Laerc-s: Improving llm-based emotion recognition in691
+conversation with speaker characteristics. In Pro-692
+ceedings of the 31st International Conference on693
+Computational Linguistics, pages 6748–6761.694
+Kornelia Gentsch, Didier Grandjean, and Klaus R695
+Scherer. 2015. Appraisals generate specific config-696
+urations of facial muscle movements in a gambling697
+task: Evidence for the component process model of698
+emotion. PloS one, 10(8):e0135837.699
+Deepanway Ghosal, Navonil Majumder, Alexander Gel-700
+bukh, Rada Mihalcea, and Soujanya Poria. 2020.701
+COSMIC: Commonsense knowledge for emotion702
+identification in conversations. In Findings of the703
+Association for Computational Linguistics: EMNLP704
+2020, pages 2470–2481.705
+Deepanway Ghosal, Navonil Majumder, Soujanya Poria,706
+Niyati Chhaya, and Alexander Gelbukh. 2019. Dia-707
+logueGCN: A graph convolutional neural network for708
+emotion recognition in conversation. In Proceedings709
+of the 2019 Conference on Empirical Methods in Nat-710
+ural Language Processing and the 9th International711
+Joint Conference on Natural Language Processing,712
+pages 154–164.713
+Shlomo Hareli and Brian Parkinson. 2008. What’s so-714
+cial about social emotions? Journal for the theory of715
+social behaviour, 38(2):131–156.716
+Jan Hofmann, Enrica Troiano, Kai Sassenberg, and Ro- 717
+man Klinger. 2020. Appraisal theories for emotion 718
+classification in text. In Proceedings of the 28th Inter- 719
+national Conference on Computational Linguistics, 720
+pages 125–138. 721
+Xin Hong, Yuan Gong, Vidhyasaharan Sethu, and 722
+Ting Dang. 2025. Aer-llm: Ambiguity-aware emo- 723
+tion recognition leveraging large language models. 724
+Preprint, arXiv:2409.18339. 725
+Hajime Hotta, Huu-Loi Le, Manh-Cuong Phan, and 726
+Minh-Tien Nguyen. 2025. Metamo: Empowering 727
+large language models with psychological distortion 728
+detection for cognition-aware coaching. In Proceed- 729
+ings of the 2025 Conference on Empirical Methods 730
+in Natural Language Processing: System Demonstra- 731
+tions, pages 862–872, Suzhou, China. Association 732
+for Computational Linguistics. 733
+Jingwen Hu, Yuchen Liu, Jinming Zhao, and Qin Jin. 734
+2021. MMGCN: Multimodal fusion via deep graph 735
+convolution network for emotion recognition in con- 736
+versation. In Proceedings of the 59th Annual Meeting 737
+of the Association for Computational Linguistics and 738
+the 11th International Joint Conference on Natural 739
+Language Processing, pages 5666–5675. 740
+Jian Huang, Yuanyuan Pu, Dongming Zhou, Jinde 741
+Cao, Jinjing Gu, Zhengpeng Zhao, and Dan Xu. 742
+2024. Dynamic hypergraph convolutional network 743
+for multimodal sentiment analysis. Neurocomputing, 744
+565:126992. 745
+Albert Q. Jiang, Alexandre Sablayrolles, Arthur Men- 746
+sch, Chris Bamford, Devendra Singh Chaplot, Diego 747
+de las Casas, Florian Bressand, Gianna Lengyel, Guil- 748
+laume Lample, Lucile Saulnier, Lélio Renard Lavaud, 749
+Marie-Anne Lachaux, Pierre Stock, Teven Le Scao, 750
+Thibaut Lavril, Thomas Wang, Timothée Lacroix, 751
+and William El Sayed. 2023. Mistral 7b. Preprint, 752
+arXiv:2310.06825. 753
+I Kuei Lin Lawrence. 1989. A concordance correlation 754
+coefficient to evaluate reproducibility. Biometrics, 755
+pages 255–268. 756
+Richard Lazarus. 1990. Emotion and adaptation. Con- 757
+temporary Sociology, 21:522. 758
+Richard S. Lazarus. 1991. Emotion and Adaptation . 759
+Oxford University Press. 760
+Shanglin Lei, Guanting Dong, Xiaoping Wang, Keheng 761
+Wang, Runqi Qiao, and Sirui Wang. 2024. Instruc- 762
+terc: Reforming emotion recognition in conversation 763
+with multi-task retrieval-augmented large language 764
+models. Preprint, arXiv:2309.11911. 765
+Zhiwei Liu, Kailai Yang, Qianqian Xie, Tianlin Zhang, 766
+and Sophia Ananiadou. 2024. Emollms: A series 767
+of emotional large language models and annotation 768
+tools for comprehensive affective analysis. In Pro- 769
+ceedings of the 30th ACM SIGKDD Conference on 770
+Knowledge Discovery and Data Mining, pages 5487– 771
+5496. 772
+10
+
+PAGE 11
+Xiaosen Lyu, Jiayu Xiong, Yuren Chen, Wanlong Wang,773
+Xiaoqing Dai, and Jing Wang. 2026. Cross-space774
+synergy: A unified framework for multimodal emo-775
+tion recognition in conversation. In Proceedings of776
+the AAAI Conference on Artificial Intelligence, vol-777
+ume 40, pages 24226–24234.778
+Hui Ma, Jian Wang, Hongfei Lin, Bo Zhang, Yijia779
+Zhang, and Bo Xu. 2023. A transformer-based model780
+with self-distillation for multimodal emotion recog-781
+nition in conversations. IEEE Transactions on Multi-782
+media, 26:776–788.783
+Navonil Majumder, Soujanya Poria, Devamanyu Haz-784
+arika, Rada Mihalcea, Alexander Gelbukh, and Erik785
+Cambria. 2019. DialogueRNN: An attentive RNN786
+for emotion detection in conversations. In Proceed-787
+ings of the AAAI Conference on Artificial Intelligence,788
+volume 33, pages 6818–6825.789
+S. Milne, C. Lomax, and M. H. Freeston. 2019. A re-790
+view of the relationship between intolerance of uncer-791
+tainty and threat appraisal in anxiety. The Cognitive792
+Behaviour Therapist, 12:e38.793
+Agnes Moors. 2009. Theories of emotion causation: A794
+review. Cognition and Emotion, 23(4):625–662.795
+Mikhail Mozikov, Nikita Severin, Maria Glushanina,796
+Mikhail Baklashkin, Andrey Savchenko, and Ilya797
+Makarov. 2024. Insideout: Unifying emotional llms798
+to foster empathy. In ECAI 2024, pages 4499–4502.799
+IOS Press.800
+Minh-Tien Nguyen, Huu-Loi Le, Manh-Cuong Phan,801
+and Hajime Hotta. 2026. Cmtd: Cognitive modeling802
+with traits and distortions for multimodal emotion803
+recognition in conversations. In Findings of the As-804
+sociation for Computational Linguistics: ACL 2026,805
+pages 839–854.806
+{Lora E.} Park, Esha Naidu, {Edward P.} Lemay, {Eliz-807
+abeth A.} Canning, {Deborah E.} Ward, Zaviera808
+Panlilio, and Valerie Vessels. 2023. Social evalu-809
+ative threat across individual, relational, and collec-810
+tive selves, pages 139–222. Advances in Experimen-811
+tal Social Psychology. Academic Press Inc., United812
+States. Publisher Copyright: © 2023.813
+Patrícia Pereira, Helena Moniz, and Joao Paulo Car-814
+valho. 2025. Deep emotion recognition in textual815
+conversations: A survey. Artificial Intelligence Re-816
+view, 58(1):10.817
+Soujanya Poria, Erik Cambria, Devamanyu Hazarika,818
+Navonil Majumder, Amir Zadeh, and Louis-Philippe819
+Morency. 2017. Context-dependent sentiment anal-820
+ysis in user-generated videos. In Proceedings of the821
+55th annual meeting of the association for compu-822
+tational linguistics (volume 1: Long papers), pages823
+873–883.824
+Soujanya Poria, Devamanyu Hazarika, Navonil Ma-825
+jumder, Gautam Naik, Erik Cambria, and Rada Mi-826
+halcea. 2019a. Meld: A multimodal multi-party827
+dataset for emotion recognition in conversations. In828
+Proceedings of the 57th Annual Meeting of the Associ- 829
+ation for Computational Linguistics, pages 527–536. 830
+Soujanya Poria, Navonil Majumder, Rada Mihalcea, and 831
+Eduard Hovy. 2019b. Emotion recognition in con- 832
+versation: Research challenges, datasets, and recent 833
+advances. IEEE Access, 7:100943–100953. 834
+Qwen, :, An Yang, Baosong Yang, Beichen Zhang, 835
+Binyuan Hui, Bo Zheng, Bowen Yu, Chengyuan 836
+Li, Dayiheng Liu, Fei Huang, Haoran Wei, Huan 837
+Lin, Jian Yang, Jianhong Tu, Jianwei Zhang, Jianxin 838
+Yang, Jiaxi Yang, Jingren Zhou, and 25 oth- 839
+ers. 2025. Qwen2.5 technical report. Preprint, 840
+arXiv:2412.15115. 841
+Laura Smart Richman and Mark R. Leary. 2009. Reac- 842
+tions to discrimination, stigmatization, ostracism, and 843
+other forms of interpersonal rejection. Psychological 844
+review, 116:365 – 383. 845
+Brent W. Roberts and Wendy F. DelVecchio. 2000. 846
+The rank-order consistency of personality traits from 847
+childhood to old age: A quantitative review of longi- 848
+tudinal studies. Psychological Bulletin, 126(1):3–25. 849
+James Russell and Lisa Barrett. 1999. Core affect, pro- 850
+totypical emotional episodes, and other things called 851
+emotion: Dissecting the elephant. Journal of person- 852
+ality and social psychology, 76:805–19. 853
+Sophie Russell and Roger Giner-Sorolla. 2011. Moral 854
+anger, but not moral disgust, responds to intentional- 855
+ity. Emotion, 11:233–240. 856
+Klaus Scherer and Agnes Moors. 2019. The emotion 857
+process: Event appraisal and component differentia- 858
+tion. Annual Review of Psychology, 70:719–745. 859
+Klaus R. Scherer. 2001. Appraisal considered as a pro- 860
+cess of multilevel sequential checking. In Klaus R. 861
+Scherer, Angela Schorr, and Tom Johnstone, editors, 862
+Appraisal Processes in Emotion: Theory, Methods, 863
+Research, pages 92–120. Oxford University Press. 864
+Klaus R Scherer. 2003. V ocal communication of emo- 865
+tion: A review of research paradigms. Speech com- 866
+munication, 40(1-2):227–256. 867
+Patrick Schober, Christa Boer, and Lothar A Schwarte. 868
+2018. Correlation coefficients: appropriate use and 869
+interpretation. Anesthesia & analgesia, 126(5):1763– 870
+1768. 871
+Björn Schuller et al. 2018. Speech emotion recognition: 872
+Two decades in a nutshell, benchmarks, and ongoing 873
+trends. Communications of the ACM. 874
+Zhiyu Shen, Yunhe Pang, Yanghui Rao, and Jianxing Yu. 875
+2025. Coe: A clue of emotion framework for emo- 876
+tion recognition in conversations. In Proceedings 877
+of the 63rd Annual Meeting of the Association for 878
+Computational Linguistics (Volume 1: Long Papers), 879
+pages 23548–23563. 880
+11
+
+PAGE 12
+Sagarika Shreevastava and Peter Foltz. 2021. Detecting881
+cognitive distortions from patient-therapist interac-882
+tions. In Proceedings of the Seventh Workshop on883
+Computational Linguistics and Clinical Psychology:884
+Improving Access, pages 151–158.885
+Craig A. Smith and Phoebe C. Ellsworth. 1985. Pat-886
+terns of cognitive appraisal in emotion. Journal of887
+Personality and Social Psychology, 48(4):813–838.888
+Joep Sonnemans and Nico H. Frijda. 1994. The struc-889
+ture of subjective emotional intensity. Cognition and890
+Emotion, 8(4):329–350.891
+Robert P. Tett and Hal A. Guterman. 2000. Situation892
+trait relevance, trait expression, and cross-situational893
+consistency: Testing a principle of trait activation.894
+Journal of Research in Personality, 34(4):397–423.895
+Enrica Troiano, Laura Ana Maria Oberländer, and Ro-896
+man Klinger. 2023. Dimensional modeling of emo-897
+tions in text with appraisal theories: Corpus creation,898
+annotation reliability, and prediction. Computational899
+Linguistics, 49(1):1–72.900
+Geng Tu, Tian Xie, Bin Liang, Hongpeng Wang, and901
+Ruifeng Xu. 2024. Adaptive graph learning for multi-902
+modal conversational emotion detection. In Proceed-903
+ings of the AAAI Conference on Artificial Intelligence,904
+volume 38, pages 19089–19097.905
+Yan Wang, Bo Wang, Yachao Zhao, Dongming Zhao,906
+Xiaojia Jin, Jijun Zhang, Ruifang He, and Yuexian907
+Hou. 2024. Emotion recognition in conversation908
+via dynamic personality. In Proceedings of LREC-909
+COLING 2024, pages 5711–5722.910
+David Watson and Lee Anna Clark. 1992. On traits911
+and temperament: General and specific factors of912
+emotional experience and their relation to the five-913
+factor model. Journal of Personality, 60(2):441–476.914
+C. Willmott and K Matsuura. 2005. Advantages of the915
+mean absolute error (mae) over the root mean square916
+error (rmse) in assessing average model performance.917
+Climate Research, 30:79.918
+Chengyan Wu, Yiqiang Cai, Yang Liu, Pengxu Zhu,919
+Yun Xue, Ziwei Gong, Julia Hirschberg, and Bolei920
+Ma. 2025a. Multimodal emotion recognition in con-921
+versations: A survey of methods, trends, challenges922
+and prospects. arXiv preprint arXiv:2505.20511.923
+Zehui Wu, Ziwei Gong, Lin Ai, Pengyuan Shi, Kaan924
+Donbekci, and Julia Hirschberg. 2025b. Beyond925
+silent letters: Amplifying LLMs in emotion recogni-926
+tion with vocal nuances. In Findings of the Associ-927
+ation for Computational Linguistics: NAACL 2025,928
+pages 2202–2218, Albuquerque, New Mexico. Asso-929
+ciation for Computational Linguistics.930
+Bo Xu, Longjiao Li, Wei Luo, Mehdi Naseriparsa, Zhe-931
+huan Zhao, Hongfei Lin, and Feng Xia. 2024. Be-932
+yond linguistic cues: Fine-grained conversational933
+emotion recognition via belief-desire modelling. In934
+Proceedings of LREC-COLING 2024, pages 2318–935
+2328.936
+Gerard Christopher Yeo and Kokil Jaidka. 2025. Be- 937
+yond context to cognitive appraisal: Emotion reason- 938
+ing as a theory of mind benchmark for large language 939
+models. In Findings of the Association for Computa- 940
+tional Linguistics: ACL 2025, pages 26517–26525, 941
+Vienna, Austria. Association for Computational Lin- 942
+guistics. 943
+Yazhou Zhang, Mengyao Wang, Youxi Wu, Prayag Ti- 944
+wari, Qiuchi Li, Benyou Wang, and Jing Qin. 2025. 945
+Dialoguellm: Context and emotion knowledge-tuned 946
+large language models for emotion recognition in 947
+conversations. Neural Networks, page 107901. 948
+A Appendix 949
+A.1 Appraisal Field Definitions 950
+Table 11 summarizes the eight appraisal fields, their 951
+valid values, operational interpretations, and theo- 952
+retical foundations used in Section 3.4. 953
+A.2 Distortion Labels 954
+We use an 11-category codebook comprising 955
+ten cognitive distortion types and an explicit 956
+no_distortion label, following common CBT defi- 957
+nitions (Beck, 2020; Shreevastava and Foltz, 2021). 958
+Emotional reasoning treats feelings as facts; over- 959
+generalization draws broad conclusions from lim- 960
+ited events; mental filtering focuses only on nega- 961
+tive evidence; should statements impose rigid ex- 962
+pectations; all-or-nothing thinking reduces situa- 963
+tions to binary extremes; mind reading assumes 964
+others’ thoughts without evidence; fortune-telling 965
+predicts outcomes without sufficient support; mag- 966
+nification exaggerates negative consequences; per- 967
+sonalization assumes excessive personal responsi- 968
+bility; and labeling assigns global judgments based 969
+on specific behaviors. The no_distortion label 970
+is used when none of these patterns is sufficiently 971
+supported. A subjective interpretation alone is not 972
+considered distorted, and when multiple patterns 973
+are plausible, the most strongly supported type is 974
+selected. Prompt in Table 13. 975
+A.3 Visual Cue Extraction 976
+For each utterance ut, we extract one represen- 977
+tative image from its temporally aligned video 978
+segment Vt = ⟨f1, . . . ,fTt⟩. We select the mid- 979
+dle frame, vt = f⌊Tt/2⌋, as a cost-effective snap- 980
+shot of the speaker’s expression without process- 981
+ing the full video. The frame is used to describe 982
+visible cues such as gaze, eyebrow configuration, 983
+mouth shape, and facial-muscle tension (Ekman 984
+and Friesen, 1978; Adams and Kleck, 2003). GPT- 985
+4o-mini generates these descriptions once for reuse 986
+12
+
+PAGE 13
+Table 11: The eight appraisal fields used by CARE, together with their valid values, interpretations, and theoretical
+grounding. The first six operationalize established appraisal constructs; social threat adapts social-evaluative threat
+to conversational settings, while affect intensity serves as an auxiliary measure of implied affect.
+Field Valid values Interpretation Theoretical grounding
+Goal relevance low, medium, high The importance of an event to the speaker’s
+goals, concerns, or well-being.
+Motivational relevance
+(Lazarus, 1990; Scherer, 2001)
+Goal congruence supports_goal,
+blocks_goal, mixed,
+unclear
+Whether the event supports or obstructs the
+speaker’s goals and desired outcomes.
+Motivational congruence and
+goal conduciveness (Lazarus,
+1990; Scherer, 2001)
+Agency self, other, shared,
+environment, unclear
+The perceived causal source of the event,
+such as the speaker, another person, or
+external circumstances.
+Causal attribution and
+self–other responsibility
+(Smith and Ellsworth, 1985;
+Scherer, 2001)
+Certainty low, medium, high The speaker’s confidence in understanding
+the situation or anticipating its
+consequences.
+Certainty and outcome
+probability (Smith and
+Ellsworth, 1985; Scherer,
+2001)
+Novelty low, medium, high The extent to which the event is unexpected,
+unfamiliar, or different from previous
+experience.
+Novelty, familiarity, and
+predictability checks (Scherer,
+2001; Troiano et al., 2023)
+Moral violation low, medium, high Whether the event conflicts with the
+speaker’s personal values or with social and
+moral norms.
+Normative significance and
+internal/external standards
+(Scherer, 2001; Troiano et al.,
+2023)
+Social threat low, medium, high A perceived threat to the speaker’s
+relationship, acceptance, belonging, social
+value, or group status.
+Social-evaluative threat;
+conversation-adapted field
+(Park et al., 2023)
+Affect intensity low, medium, high The estimated strength of the emotional
+response implied by the utterance and its
+conversational context.
+Subjective emotional intensity;
+auxiliary field (Sonnemans
+and Frijda, 1994)
+across all backbone experiments and is instructed987
+to rely only on visual evidence, preventing lexical988
+content from influencing the output.989
+You will be given:
+(1) A spoken sentence, and
+(2) An image captured at the moment it was spoken.
+Your task: Based only on the facial expression
+in the image, describe it briefly and precisely.
+Focus on visible emotional cues.
+A.4 Acoustic Features990
+For each utterance ut, we use its temporally aligned991
+audio segment as the input to an audio-capable mul-992
+timodal LLM. Rather than relying on handcrafted993
+numerical features or a separate acoustic classi-994
+fier, we use prompt-based acoustic reasoning to995
+produce an interpretable natural-language descrip-996
+tion of the speaker’s vocal delivery. The extraction997
+covers four groups of acoustic cues: fundamental998
+frequency, loudness and energy, speaking rate and999
+pauses, and voice quality. These properties provide1000
+complementary indicators of affective arousal, ten-1001
+sion, calmness, fatigue, and vulnerability (Banse1002
+and Scherer, 1996; Schuller et al., 2018; Poria et al.,1003
+2017; Busso et al., 2008; Scherer, 2003). The gen-1004
+erated description records the perceived acoustic 1005
+patterns rather than assigning an emotion label. It 1006
+is aligned with the corresponding utterance and 1007
+supplied to the Speech Agent, which interprets the 1008
+affective implications of the available vocal cues. 1009
+You are an expert in acoustic signal analysis. Given an au-
+dio segment, describe the following speech-related acous-
+tic features:
+(1) Fundamental frequency (F0): pitch level, stability,
+variation, and contour.
+(2) Loudness and energy: vocal intensity and changes in
+energy.
+(3) Speaking rate and pauses: speech pace, hesitation, and
+pause patterns.
+(4) V oice quality: whether the voice sounds breathy,
+strained, hoarse, rough, tight, smooth, or clear.
+Describe these acoustic cues briefly and precisely, and ex-
+plain their possible affective implications without directly
+predicting an emotion label.
+A.5 Appraisal Predictor 1010
+The Predictor maps the cognitive appraisal state 1011
+extracted for ut to an emotion-space prediction. It 1012
+provides CARE with prior knowledge of the utter- 1013
+ance ut to Y that complements the zero-shot LLM 1014
+agents. The predictor is trained by a lightweight 1015
+predictor xt = ϕ(apt) ∈ R16, where ϕ maps ordi- 1016
+13
+
+PAGE 14
+nal appraisal dimensions to normalized scalar fea-1017
+tures, represents goal congruence and agency using1018
+reduced and standard one-hot encodings. Given1019
+class-specific weights wy and biases by, the Ap-1020
+praisal Predictor estimates1021
+p(P )t (y) = exp
+ 
+w⊤y xt + by
+P
+y′∈Y exp
+
+w⊤y′xt + by′
+ , y ∈ Y
+(12)1022
+The parameters are learned by minimizing the1023
+class-weighted, using the L2-regularized cross-1024
+entropy objective function.1025
+LP = −
+X
+i
+αyi log p(P )i (yi) +λ ∥W∥2F (13)1026
+where αyi is for class imbalance, λ controls the1027
+regularization strength, and W stacks the class-1028
+specific weight vectors. The bias parameters are1029
+excluded from regularization. The predictor is opti-1030
+mized by the development set split from the train-1031
+ing set. Gold emotion labels supervise only the1032
+Appraisal Predictor; they are never exposed to the1033
+cognitive appraisal or reasoning agents. On the test1034
+split, the predictor achieves weighted F1 scores of1035
+56.63 on MELD and 46.06 on IEMOCAP.1036
+At inference time, the Appraisal Predictor re-1037
+turns its highest-scoring emotion and the corre-1038
+sponding score.1039
+˜y(P )t = arg maxy∈Y p(P )t (y), ρ (P )t = maxy∈Y p(P )t (y).
+(14)1040
+The evidence voter uses ρ(P )t for voting as a1041
+relative confidence score.1042
+A.6 Detailed Operation of CARE1043
+Algorithm 1 summarizes both the execution flow1044
+and the conditional reasoning logic of CARE for1045
+each target utterance ut. The algorithm first ob-1046
+tains the Text Agent prediction (˜y(T )t , c(T )t ) and1047
+extracts the cognitive appraisal state apt according1048
+to Eq. 2. The appraisal state is then encoded into1049
+xt, from which the Appraisal Predictor produces1050
+(˜y(P )t , ρ(P )t ) using Eqs. 12–14. Next, CARE derives1051
+the modality-availability indicators EVt and EAt , to-1052
+gether with the speaker-history indicator Ht, and1053
+evaluates the gate g(k)t for each reasoning agent ac-1054
+cording to Section 3.5. These decisions determine1055
+the utterance-specific active-agent set Kt, ensuring1056
+that only appraisal-relevant agents are invoked.1057
+For each k ∈ Kt, the corresponding agent gen-1058
+erates reasoning evidence r(k)t , which is indepen-1059
+dently converted into (˜y(k)t , c(k)t ) by the shared1060
+Algorithm 1 CARE Inference
+Input: Ct, ut, st, vt, at, Y, {ωs}
+Output: ˆyt
+1: (˜y(T )t , c(T )t ) ← T(Ct, ut, st, Y)
+2: Extract apt = A(Ct, ut, st)
+3: Encode xt = ϕ(apt)
+4: Obtain (˜y(P )t , ρ(P )t ) using Eqs. 12–14
+5: Derive EVt , EAt , Ht from the inputs
+6: Compute g(k)t from apt, EVt , EAt , Ht using Section 3.5
+7: Kt ← {k ∈ K |g(k)t = 1}
+8: for all k ∈ Kt do
+9: Obtain r(k)t using Ct, ut, st, apt and the modality re-
+quired by k
+10: Obtain (˜y(k)t , c(k)t ) using Eq. 9
+11: end for
+12: St ← {T, P} ∪ Kt
+13: Compute Vt(y) from St, {ωs}, {c(s)t } using Section 3.8
+14: if Vt(y) = 0, ∀y ∈ Ythen
+15: ˆyt ← ˜y(T )t
+16: else
+17: ˆyt ← arg maxy∈Y Vt(y)
+18: end if
+19: return ˆyt
+Emotion Inference Agent through Eq. 9. CARE 1061
+then aggregates the Text Agent, Appraisal Predic- 1062
+tor, and activated reasoning agents into the source 1063
+set St. Each source contributes its prediction ˜y(s)t , 1064
+confidence score c(s)t , and source weight ωs to the 1065
+voting score Vt(y), with the source-specific con- 1066
+fidence defined in Eq. 10. The final emotion ˆyt 1067
+is selected according to Eq. 11; when all Vt(y) 1068
+values are zero, the algorithm returns ˜y(T )t as a de- 1069
+terministic fallback. Therefore, CARE combines a 1070
+sequential inference process with conditional agent 1071
+execution, reducing unnecessary reasoning while 1072
+guaranteeing a prediction for every target utterance. 1073
+A.7 Sensitivity of Weighted Evidence Voting 1074
+Uniform assigns the same weight to every evidence 1075
+source, whereas Perturbed independently varies 1076
+each proposed source weight within ±20% and 1077
+reports the mean and standard deviation over 200 1078
+random configurations. Table 12 shows that the pro- 1079
+posed weighting scheme achieves slightly higher 1080
+performance than uniform weighting, while perfor- 1081
+mance remains stable under random perturbations. 1082
+This suggests that Weighted Evidence V oting is 1083
+robust to moderate changes in source weights. 1084
+A.8 Output Observation 1085
+As shown in Figure 3, Ross’s opening utterance 1086
+creates a conflict between surface wording and un- 1087
+derlying appraisal. The profanity, exclamation, and 1088
+confrontational question strongly resemble anger, 1089
+14
+
+PAGE 15
+Table 12: Sensitivity analysis of Weighted Evidence
+V oting on IEMOCAP. Perturbed results are reported as
+mean ± standard deviation over 200 randomly sampled
+weight configurations.
+Weight setting ACC (%) F1 (%)
+Uniform 70.13 69.02
+Proposed 70.25 69.19
+Perturbed ±20% 70 .24 ± 0.03 69 .17 ± 0.04
+causing CoT and InsideOut to overemphasize lexi-1090
+cal cues. AER-LLM and SpeechCue fail similarly1091
+because the stable mid-range pitch and moderate1092
+energy provide no distinctive acoustic evidence for1093
+surprise. CMTD’s error likely stems from fusing1094
+all available evidence without considering its rel-1095
+evance to the utterance. Although Ross’s raised1096
+eyebrows, open mouth, and confused expression1097
+indicate surprise, this visual evidence is diluted by1098
+ambiguous speech, uninformative personality cues,1099
+and anger-like wording. CARE instead focuses on1100
+high novelty and expectancy violation while recog-1101
+nizing that blame, social threat, and moral violation1102
+provide limited support for anger. By excluding the1103
+"no distortion" output, inactive personality reason-1104
+ing, and ambiguous speech evidence, CARE allows1105
+the appraisal, DoT, and visual cues to jointly sup-1106
+port the correct surprise prediction.1107
+A.9 Human evaluation1108
+Three evaluators trained in clinical/counseling psy-1109
+chology and CBT independently assessed 100 utter-1110
+ances. They rated TC and CA on five-point scales,1111
+measuring whether each appraisal-to-gate mapping1112
+was theoretically supported and sufficiently infor-1113
+mative for agent activation. IRR measured agree-1114
+ment across evaluators. Gate activation indicated1115
+the need for further analysis, not confirmation of a1116
+psychological condition or emotion.1117
+A.10 Psychological Rationale of the Gates1118
+The DoT gate uses goal relevance together with1119
+blockage, uncertainty, or affect intensity to iden-1120
+tify appraisal conflicts requiring cognitive anal-1121
+ysis (Aue et al., 2007). The Distortion gate de-1122
+pends on DoT because distorted thinking can only1123
+be examined after identifying a subjective inter-1124
+pretation. Low certainty motivates predictive-1125
+bias checks, human agency motivates attributional1126
+checks, social threat motivates interpersonal-bias1127
+checks, and moral violation motivates rigid-norm1128
+checks (Milne et al., 2019). The Social gate maps1129
+social threat, moral violation, and other-caused 1130
+goal blockage to relational and normative reason- 1131
+ing (Richman and Leary, 2009). The Trait gate 1132
+requires repeated speaker history and a salient trait- 1133
+relevant situation to avoid confusing momentary 1134
+states with stable tendencies (Fleeson, 2001). Fi- 1135
+nally, the Visual and Acoustic gates use Qt to iden- 1136
+tify appraisals for which nonverbal evidence may 1137
+resolve affective ambiguity (Gentsch et al., 2015). 1138
+A.11 Prompts 1139
+Table 13 shows the prompts of seven psychological 1140
+indicators used in the CARE framework. Based on 1141
+these prompts, CARE uses Algorithm 1 to process 1142
+an input, extracts and selects appropriate informa- 1143
+tion, and predicts the emotion. 1144
+15
+
+PAGE 16
+Conversation
+InsideOut
+CoT
+AER-LLM
+SpeechCue
+CMTD
+CARE
+Ross: “Okay, where in the hell did you get that?!”
+Gold: surprise
+Speech: stable mid pitch · moderate energy · slightly
+fast
+anger
+anger
+anger
+anger
+anger
+surprise
+Monica: “When Mom and Dad drove you … I swam into
+the lake and fished it out.”
+Gold: neutral
+Speech: stable mid pitch · moderate energy · minimal
+pauses
+joy
+surprise
+surprise
+joy
+neutral
+neutral
+Ross: “That cup is mine!”
+Gold: anger
+Speech: stable mid pitch · subdued energy · continuous
+delivery
+anger
+anger
+anger
+anger
+anger
+anger
+Monica: “No it's not! … you're gonna have to win it!”
+Gold: anger
+Speech: mid-low pitch · moderate energy · brief pauses
+joy
+anger
+anger
+anger
+anger
+anger
+Rachel: “All right, so are we not having dinner at all?”
+Gold: sadness
+Speech: mid-low pitch · mild variation · subdued energy
+· brief pause
+neutral
+neutral
+fear
+neutral
+neutral
+sadness
+Figure 3: Comparison of emotion predictions on a MELD.
+Table 13: Prompts used by the text agent and six appraisal-gated reasoning agents.
+Method Prompt
+Text agent
+Given the speaker, dialogue history, and target utterance, predict the primary emotion expressed by each utterance.
+Use textual context only and do not use sentiment or multimodal information.
+Return exactly one prediction per utterance containing utt_key, emotion, and confidence.
+The emotion must be one of: neutral, joy, sadness, anger, surprise, fear, or disgust.
+Diagnosis of Thought agent
+Based on the conversation, answer the following diagnosis-of-thought questions:
+1) What is the situation? Identify the objective facts and the speaker’s subjective thoughts or opinions.
+2) What makes the speaker believe that the thought is true or untrue? Identify the reasoning processes
+that support and contradict the thought.
+3) Why does the speaker use such reasoning, and what is the underlying cognition mode?
+Cognitive Distortion agent
+Given the conversation and the Diagnosis-of-Thought output, identify the supported cognitive distortion.
+Consider emotional reasoning, overgeneralization, mental filtering, should statements, all-or-nothing thinking,
+mind reading, fortune-telling, magnification, personalization, and labeling.
+Use no_distortion when no listed distortion is supported.
+Return cognitive_distortion, distortion_evidence,
+distortion_implication, and evidence_strength.
+Do not assign an emotion label.
+Social agent
+Analyze the social meaning beyond the literal text, including relationships, conflict, face threat, blame, support,
+social evaluation, and moral or norm violations.
+Describe the affective social implication without assigning an emotion label.
+Return conflict_level, face_threat, blame_target,
+social_interpretation, and evidence_strength.
+Visual agent
+Use the visual description associated with the selected utterance as the primary evidence.
+Do not invent facial expressions or body-language cues that are not present in the visual input.
+Describe the affective meaning of the available visual cues without assigning an emotion label.
+If the visual description is weak, contradictory, or affectively uninformative, use low or no evidence strength.
+Return facial_cues, affective_visual_interpretation, and evidence_strength.
+Speech agent
+Use the audio or prosody description associated with the selected utterance as the primary evidence.
+Do not invent pitch, energy, tempo, or voice-quality cues that are not present in the audio input.
+Describe the affective meaning of the vocal cues without assigning an emotion label.
+If the audio is described as stable, moderate, calm, or weak, report low affective evidence.
+Return vocal_cues, affective_vocal_interpretation, and evidence_strength.
+Trait agent
+You are an expert psychologist specializing in personality analysis. Based on the Big Five Personality Traits model,
+you will evaluate the personality of two individuals the speaker and the listener based on their conversation in a given situation.
+Each response reflects different dimensions of personality traits. For each of the Big Five traits, consider the following facets:
+Conscientiousness: order, dutifulness, achievement striving, self-discipline, deliberation.
+Agreeableness: trust, straightforwardness, altruism, compliance, modesty, tendermindedness.
+Neuroticism: anxiety, angry hostility, depression, self-consciousness, impulsiveness, vulnerability.
+Openness: fantasy, aesthetics, values.
+Extraversion: warmth, gregariousness, assertiveness, excitement-seeking.
+Instructions: Read the given situation and conversation carefully.
+Evaluate both the speaker and the listener based on their dialogue.
+For each person, assign a score between 1 (Very Low) and 5 (Very High) for each of the Big Five traits.
+Scores may be rounded to the nearest tenth (e.g., 3.5).
+1: Very Low - The response shows little to no alignment with the trait’s facets.
+2: Low - The response shows weak alignment with the trait’s facets.
+3: Moderate - The response shows some alignment but not strongly.
+4: High - The response strongly aligns with the trait’s facets.
+5: Very High - The response shows exceptional alignment with the trait’s facets.
+16

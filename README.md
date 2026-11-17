@@ -1,7 +1,32 @@
 # CogAI / AnMi
 
-Mã nguồn web, backend và firmware cho hệ sinh thái CogAI. Xem
+Mã nguồn web, backend và firmware cho hệ sinh thái CogAI, kèm hồ sơ dự thi,
+báo cáo AnMi, hình ảnh/video demo, paper tham khảo và ghi chú nghiên cứu. Xem
 [hướng dẫn chạy dự án](cogai/README.md).
+
+| Thư mục | Nội dung |
+| --- | --- |
+| `cogai/` | Web React, backend FastAPI, firmware robot AnMi, tài liệu vận hành |
+| `Bao cao AnMi/` | Pitch, mô hình tài chính, kiểm chứng thị trường (`_Luu_tru/`: bản cũ) |
+| `Hinh anh CogAI/` | Hình minh họa và video demo |
+| `Tài liệu/` | Thuyết minh, phiếu đăng ký, bản cam kết dự thi |
+| `Paper/`, `research/` | Paper tham khảo, văn bản trích, mã upstream Mind-Reframe/Lumina |
+
+## Tái tạo sau khi clone
+
+Repository không chứa secrets; các phần sau phải tạo lại trên máy mới:
+
+1. Cài Python 3.12/3.13, [uv](https://docs.astral.sh/uv/) và Node 22.12+.
+2. `cd cogai/backend; uv sync --frozen --python 3.12` rồi
+   `cd ../frontend; npm ci` (tạo lại `.venv` và `node_modules`).
+3. Sao chép `cogai/backend/.env.example` thành `cogai/backend/.env` và điền khóa
+   riêng (hoặc chạy `node cogai/scripts/setup-voice.mjs`). Không có khóa thì
+   ứng dụng vẫn chạy ở chế độ demo.
+4. Chạy `node cogai/scripts/dev.mjs`. Khóa mã hóa `data/.key` và CSDL người dùng
+   được tạo mới; dữ liệu cũ không được đưa lên GitHub. Chỉ chỉ mục kiến thức
+   công khai `cogai/backend/data/knowledge.sqlite3` được giữ để CogRAG chạy ngay.
+5. Firmware: điền endpoint riêng vào `config.json` của board `ricky-war-tank`
+   (xem mục bên dưới) trước khi build.
 
 ## Giữ phiên bản robot
 
@@ -32,7 +57,7 @@ riêng rồi đưa nội dung đó vào repository mới. Không upload cả th�
 gốc hay ZIP sao lưu. Mỗi lần sửa mã, chạy lại kiểm tra và tạo lại gói.
 
 `.gitignore` giữ riêng `.env`, khóa, database, token, firmware, backup,
-cache, các gói triển khai và hồ sơ dự thi/nghiên cứu chưa duyệt công khai.
+cache, các gói triển khai và biên bản vận hành chứa endpoint thật.
 Hai tệp `.env.example` và `.env.production.example` là mẫu được giữ lại.
 Kiểm tra tự động không thay thế việc duyệt nội dung trước khi công khai;
 không phân tích lịch sử Git trên máy chủ.
